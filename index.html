@@ -1,0 +1,2798 @@
+<!DOCTYPE html><html lang="es"><head><meta name="x-poe-datastore-behavior" content="local_only"><meta http-equiv="Content-Security-Policy" content="default-src 'self' 'unsafe-inline' 'unsafe-eval' data: blob: https://cdnjs.cloudflare.com https://cdn.jsdelivr.net https://code.jquery.com https://unpkg.com https://d3js.org https://threejs.org https://cdn.plot.ly https://stackpath.bootstrapcdn.com https://maps.googleapis.com https://cdn.tailwindcss.com https://ajax.googleapis.com https://kit.fontawesome.com https://cdn.datatables.net https://maxcdn.bootstrapcdn.com https://code.highcharts.com https://tako-static-assets-production.s3.amazonaws.com https://www.youtube.com https://fonts.googleapis.com https://fonts.gstatic.com https://pfst.cf2.poecdn.net https://puc.poecdn.net https://i.imgur.com https://wikimedia.org https://*.icons8.com https://*.giphy.com https://picsum.photos https://images.unsplash.com https://*.basemaps.cartocdn.com https://router.project-osrm.org https://generativelanguage.googleapis.com https://api.groq.com; frame-src 'self' https://www.youtube.com https://trytako.com; child-src 'self'; manifest-src 'self'; worker-src 'self'; upgrade-insecure-requests; block-all-mixed-content;">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<meta name="theme-color" content="#0a0a2e">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="description" content="¿A Donde? - Encuentra lugares en Hong Kong. 去邊度？Where to?">
+<title>¿A Donde? 去邊度？ Where to?</title>
+<link rel="manifest" href="manifest.json">
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'%3E%3Crect width='512' height='512' rx='100' fill='%230a0a2e'/%3E%3Cpath d='M256 80c-77 0-140 63-140 140 0 60 100 180 140 220 40-40 140-160 140-220 0-77-63-140-140-140z' fill='%2300f0ff' opacity='.9'/%3E%3Ccircle cx='256' cy='210' r='50' fill='%230a0a2e'/%3E%3Ctext x='256' y='228' text-anchor='middle' fill='%2300f0ff' font-family='Arial Black' font-size='48'%3EA%3F%3C/text%3E%3C/svg%3E">
+<link rel="apple-touch-icon" href="icon.png">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<style>
+:root{
+--bg:#0a0a2e;--bg2:#12123a;--bg3:#1a1a4e;--text:#e0e0ff;--text2:#a0a0cc;
+--accent:#00f0ff;--accent2:#ff00aa;--accent3:#ffdd00;--card:rgba(20,20,60,0.85);
+--border:rgba(0,240,255,0.2);--glow:0 0 20px rgba(0,240,255,0.3);--radius:16px;
+--menu-bg:rgba(10,10,46,0.95);--shadow:0 8px 32px rgba(0,0,0,0.4);
+}
+[data-theme="light"]{
+--bg:#f0f4f8;--bg2:#ffffff;--bg3:#e8ecf0;--text:#1a1a2e;--text2:#555577;
+--accent:#0066cc;--accent2:#cc0066;--accent3:#cc8800;--card:rgba(255,255,255,0.95);
+--border:rgba(0,102,204,0.2);--glow:0 0 20px rgba(0,102,204,0.15);
+--menu-bg:rgba(240,244,248,0.97);--shadow:0 8px 32px rgba(0,0,0,0.1);
+}
+[data-theme="neon"]{
+--bg:#0d001a;--bg2:#1a0033;--bg3:#2a0050;--text:#f0f0ff;--text2:#c0a0e0;
+--accent:#ff00ff;--accent2:#00ff88;--accent3:#ffff00;--card:rgba(26,0,51,0.9);
+--border:rgba(255,0,255,0.3);--glow:0 0 25px rgba(255,0,255,0.4);
+--menu-bg:rgba(13,0,26,0.96);--shadow:0 8px 32px rgba(255,0,255,0.15);
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;background:var(--bg);color:var(--text);overflow:hidden;height:100vh;height:100dvh;transition:all .4s;}
+::-webkit-scrollbar{width:6px;}
+::-webkit-scrollbar-track{background:var(--bg2);}
+::-webkit-scrollbar-thumb{background:var(--accent);border-radius:3px;}
+#splash{position:fixed;inset:0;background:var(--bg);display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:10000;transition:opacity .8s;}
+#splash.hide{opacity:0;pointer-events:none;}
+#splash svg{width:120px;height:120px;animation:splashPulse 1.5s infinite;}
+@keyframes splashPulse{0%,100%{transform:scale(1);filter:drop-shadow(0 0 10px var(--accent));}50%{transform:scale(1.1);filter:drop-shadow(0 0 30px var(--accent));}}
+#splash h1{color:var(--accent);font-size:2rem;margin-top:20px;}
+#splash p{color:var(--text2);font-size:.9rem;margin-top:8px;}
+.app{height:100vh;height:100dvh;display:flex;flex-direction:column;position:relative;}
+.header{position:relative;z-index:1000;background:var(--bg2);padding:8px 16px;display:flex;align-items:center;gap:12px;border-bottom:1px solid var(--border);box-shadow:var(--glow);}
+.logo-wrap{cursor:pointer;display:flex;align-items:center;gap:8px;flex-shrink:0;}
+.logo-wrap svg{width:40px;height:40px;transition:transform .3s,filter .3s;}
+.logo-wrap:hover svg{transform:rotate(15deg) scale(1.15);filter:drop-shadow(0 0 15px var(--accent2));}
+.logo-text{display:flex;flex-direction:column;line-height:1.1;}
+.logo-text .main{font-size:1.1rem;font-weight:900;color:var(--accent);text-shadow:0 0 10px rgba(0,240,255,0.3);}
+.logo-text .sub{font-size:.55rem;color:var(--text2);}
+.header-actions{margin-left:auto;display:flex;gap:8px;align-items:center;}
+.hdr-btn{background:var(--card);border:1px solid var(--border);color:var(--text);width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;cursor:pointer;transition:all .3s;font-size:.85rem;}
+.hdr-btn:hover{background:var(--accent);color:var(--bg);box-shadow:var(--glow);}
+.hdr-btn.active{background:var(--accent);color:var(--bg);}
+.search-wrap{position:relative;z-index:999;background:var(--bg2);padding:8px 16px;display:flex;gap:8px;align-items:center;}
+.search-input{flex:1;background:var(--bg3);border:1px solid var(--border);color:var(--text);padding:10px 16px;border-radius:25px;font-size:.95rem;outline:none;transition:border-color .3s,box-shadow .3s;}
+.search-input:focus{border-color:var(--accent);box-shadow:var(--glow);}
+.search-input::placeholder{color:var(--text2);}
+.search-btn{background:var(--accent);color:var(--bg);border:none;width:40px;height:40px;border-radius:50%;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:1rem;transition:all .3s;flex-shrink:0;}
+.search-btn:hover{transform:scale(1.1);box-shadow:var(--glow);}
+.search-btn.recording{background:var(--accent2);animation:pulse 1s infinite;}
+@keyframes pulse{0%,100%{box-shadow:0 0 0 0 rgba(255,0,170,0.5);}50%{box-shadow:0 0 0 15px rgba(255,0,170,0);}}
+.cats-bar{background:var(--bg2);padding:6px 12px;display:flex;gap:8px;overflow-x:auto;border-bottom:1px solid var(--border);-webkit-overflow-scrolling:touch;}
+.cats-bar::-webkit-scrollbar{height:0;}
+.cat-chip{flex-shrink:0;background:var(--card);border:1px solid var(--border);color:var(--text);padding:6px 14px;border-radius:20px;font-size:.78rem;cursor:pointer;transition:all .3s;display:flex;align-items:center;gap:6px;white-space:nowrap;}
+.cat-chip:hover,.cat-chip.active{background:var(--accent);color:var(--bg);border-color:var(--accent);box-shadow:var(--glow);}
+.cat-chip i{font-size:.85rem;}
+#map{flex:1;z-index:1;}
+.leaflet-control-zoom{display:none;}
+.leaflet-popup-content-wrapper{background:var(--card)!important;color:var(--text)!important;border:1px solid var(--border)!important;border-radius:var(--radius)!important;box-shadow:var(--shadow)!important;backdrop-filter:blur(12px);}
+.leaflet-popup-tip{background:var(--card)!important;}
+.leaflet-popup-content{margin:12px 16px!important;font-size:.88rem;}
+.leaflet-popup-content .popup-title{font-weight:700;font-size:1rem;color:var(--accent);margin-bottom:4px;}
+.leaflet-popup-content .popup-cat{font-size:.75rem;color:var(--text2);margin-bottom:6px;}
+.leaflet-popup-content .popup-addr{font-size:.82rem;margin-bottom:6px;}
+.leaflet-popup-content .popup-btns{display:flex;gap:6px;margin-top:8px;flex-wrap:wrap;}
+.leaflet-popup-content .popup-btn{padding:4px 12px;border-radius:12px;font-size:.75rem;cursor:pointer;border:1px solid var(--border);background:var(--bg3);color:var(--text);transition:all .2s;}
+.leaflet-popup-content .popup-btn:hover{background:var(--accent);color:var(--bg);}
+.leaflet-popup-content .popup-btn.fav{color:var(--accent3);}
+.leaflet-popup-content .delivery-badge{display:inline-flex;align-items:center;gap:4px;background:var(--accent2);color:#fff;padding:2px 8px;border-radius:10px;font-size:.7rem;margin:4px 0;}
+.float-menu{position:fixed;bottom:16px;left:50%;transform:translateX(-50%);z-index:2000;display:flex;gap:4px;background:var(--menu-bg);backdrop-filter:blur(20px);padding:8px 12px;border-radius:25px;border:1px solid var(--border);box-shadow:var(--shadow),var(--glow);transition:all .3s;}
+.float-menu .fm-btn{width:48px;height:48px;border-radius:50%;border:none;background:transparent;color:var(--text);font-size:1.1rem;cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;transition:all .3s;position:relative;}
+.float-menu .fm-btn span{font-size:.55rem;color:var(--text2);}
+.float-menu .fm-btn:hover,.float-menu .fm-btn.active{color:var(--accent);transform:translateY(-4px);text-shadow:0 0 10px var(--accent);}
+.float-menu .fm-btn.active::after{content:'';position:absolute;bottom:2px;width:4px;height:4px;border-radius:50%;background:var(--accent);box-shadow:0 0 8px var(--accent);}
+.float-menu .fm-center{width:56px;height:56px;border-radius:50%;background:linear-gradient(135deg,var(--accent),var(--accent2));color:#fff;font-size:1.5rem;border:3px solid var(--bg);margin-top:-12px;box-shadow:0 0 20px rgba(0,240,255,0.4);display:flex;align-items:center;justify-content:center;cursor:pointer;transition:all .3s;}
+.float-menu .fm-center:hover{transform:scale(1.1) translateY(-4px);box-shadow:0 0 30px rgba(0,240,255,0.6);}
+.panel{position:fixed;top:0;right:-100%;width:100%;max-width:420px;height:100%;background:var(--bg);z-index:3000;transition:right .4s cubic-bezier(.4,0,.2,1);display:flex;flex-direction:column;box-shadow:-5px 0 30px rgba(0,0,0,0.5);}
+.panel.open{right:0;}
+.panel-hdr{padding:16px 20px;background:var(--bg2);border-bottom:1px solid var(--border);display:flex;align-items:center;gap:12px;}
+.panel-hdr h2{flex:1;font-size:1.1rem;color:var(--accent);}
+.panel-close{background:none;border:none;color:var(--text);font-size:1.3rem;cursor:pointer;padding:4px;}
+.panel-body{flex:1;overflow-y:auto;padding:16px;}
+.panel-section{margin-bottom:20px;}
+.panel-section h3{font-size:.9rem;color:var(--accent);margin-bottom:10px;display:flex;align-items:center;gap:8px;}
+.form-group{margin-bottom:12px;}
+.form-group label{display:block;font-size:.82rem;color:var(--text2);margin-bottom:4px;}
+.form-input{width:100%;background:var(--bg3);border:1px solid var(--border);color:var(--text);padding:10px 14px;border-radius:12px;font-size:.9rem;outline:none;transition:border-color .3s;}
+.form-input:focus{border-color:var(--accent);}
+.form-btn{padding:10px 20px;border-radius:12px;border:1px solid var(--border);background:var(--card);color:var(--text);font-size:.88rem;cursor:pointer;transition:all .3s;display:inline-flex;align-items:center;gap:8px;}
+.form-btn:hover{background:var(--accent);color:var(--bg);border-color:var(--accent);}
+.form-btn.primary{background:var(--accent);color:var(--bg);border-color:var(--accent);}
+.form-btn.primary:hover{background:var(--accent2);border-color:var(--accent2);}
+.form-btn.danger{background:#ff3355;color:#fff;border-color:#ff3355;}
+.toggle-row{display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid var(--border);}
+.toggle-row label{font-size:.88rem;}
+.toggle{position:relative;width:44px;height:24px;background:var(--bg3);border-radius:12px;cursor:pointer;transition:background .3s;border:1px solid var(--border);}
+.toggle.on{background:var(--accent);}
+.toggle::after{content:'';position:absolute;top:2px;left:2px;width:18px;height:18px;border-radius:50%;background:#fff;transition:left .3s;box-shadow:0 2px 4px rgba(0,0,0,0.3);}
+.toggle.on::after{left:22px;}
+.item-card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:12px;margin-bottom:10px;transition:all .3s;cursor:pointer;}
+.item-card:hover{border-color:var(--accent);box-shadow:var(--glow);}
+.item-card .ic-title{font-weight:600;font-size:.95rem;color:var(--accent);}
+.item-card .ic-sub{font-size:.78rem;color:var(--text2);margin-top:2px;}
+.item-card .ic-actions{display:flex;gap:6px;margin-top:8px;}
+.badge{display:inline-block;padding:2px 8px;border-radius:10px;font-size:.7rem;font-weight:600;}
+.badge-delivery{background:var(--accent2);color:#fff;}
+.badge-open{background:#00cc66;color:#fff;}
+.badge-closed{background:#cc3333;color:#fff;}
+.tabs{display:flex;gap:4px;margin-bottom:16px;background:var(--bg3);padding:4px;border-radius:12px;}
+.tab{flex:1;padding:8px;text-align:center;border-radius:10px;font-size:.82rem;cursor:pointer;transition:all .3s;color:var(--text2);}
+.tab.active{background:var(--accent);color:var(--bg);font-weight:600;}
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.6);backdrop-filter:blur(4px);z-index:5000;display:none;align-items:center;justify-content:center;padding:20px;}
+.modal-overlay.show{display:flex;}
+.modal{background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius);padding:24px;max-width:400px;width:100%;box-shadow:var(--shadow);max-height:80vh;overflow-y:auto;}
+.modal h2{color:var(--accent);margin-bottom:16px;font-size:1.2rem;}
+.toast{position:fixed;top:20px;left:50%;transform:translateX(-50%) translateY(-100px);background:var(--card);border:1px solid var(--border);color:var(--text);padding:12px 24px;border-radius:12px;z-index:9999;transition:transform .4s;backdrop-filter:blur(12px);box-shadow:var(--shadow);font-size:.9rem;}
+.toast.show{transform:translateX(-50%) translateY(0);}
+.toast.error{border-color:#ff3355;color:#ff6688;}
+.toast.success{border-color:#00cc66;color:#44ffaa;}
+.footer-info{padding:16px;text-align:center;font-size:.75rem;color:var(--text2);border-top:1px solid var(--border);}
+.footer-info a{color:var(--accent);text-decoration:none;}
+.footer-info a:hover{text-decoration:underline;}
+.ai-chat{display:flex;flex-direction:column;height:100%;}
+.ai-messages{flex:1;overflow-y:auto;padding:12px;}
+.ai-msg{margin-bottom:12px;padding:10px 14px;border-radius:12px;font-size:.88rem;max-width:85%;word-wrap:break-word;}
+.ai-msg.user{background:var(--accent);color:var(--bg);margin-left:auto;border-bottom-right-radius:4px;}
+.ai-msg.bot{background:var(--card);border:1px solid var(--border);border-bottom-left-radius:4px;}
+.ai-input-wrap{display:flex;gap:8px;padding:12px;border-top:1px solid var(--border);}
+.ai-input{flex:1;background:var(--bg3);border:1px solid var(--border);color:var(--text);padding:10px;border-radius:12px;outline:none;resize:none;font-family:inherit;font-size:.88rem;}
+.loc-btn{position:fixed;bottom:90px;right:16px;z-index:1500;width:48px;height:48px;border-radius:50%;background:var(--card);border:2px solid var(--accent);color:var(--accent);font-size:1.2rem;cursor:pointer;display:flex;align-items:center;justify-content:center;box-shadow:var(--shadow);transition:all .3s;backdrop-filter:blur(8px);}
+.loc-btn:hover{background:var(--accent);color:var(--bg);}
+.zoom-ctrls{position:fixed;bottom:150px;right:16px;z-index:1500;display:flex;flex-direction:column;gap:4px;}
+.zoom-ctrls button{width:40px;height:40px;border-radius:12px;background:var(--card);border:1px solid var(--border);color:var(--text);font-size:1.1rem;cursor:pointer;backdrop-filter:blur(8px);transition:all .3s;}
+.zoom-ctrls button:hover{background:var(--accent);color:var(--bg);}
+.install-banner{position:fixed;top:0;left:0;right:0;z-index:8000;background:linear-gradient(135deg,var(--accent),var(--accent2));padding:12px 20px;display:none;align-items:center;gap:12px;color:#fff;font-size:.88rem;animation:slideDown .5s;}
+@keyframes slideDown{from{transform:translateY(-100%);}to{transform:translateY(0);}}
+.install-banner button{background:rgba(255,255,255,0.2);border:1px solid rgba(255,255,255,0.4);color:#fff;padding:6px 16px;border-radius:20px;cursor:pointer;font-size:.82rem;white-space:nowrap;}
+.install-banner .close-ib{background:none;border:none;color:#fff;font-size:1.2rem;cursor:pointer;margin-left:auto;}
+.offline-bar{position:fixed;top:0;left:0;right:0;background:#ff6633;color:#fff;text-align:center;padding:6px;font-size:.78rem;z-index:9000;display:none;}
+@media(max-width:480px){
+.header{padding:6px 10px;}
+.logo-text .main{font-size:.95rem;}
+.float-menu{padding:6px 8px;gap:2px;bottom:8px;}
+.float-menu .fm-btn{width:42px;height:42px;font-size:1rem;}
+.float-menu .fm-btn span{font-size:.5rem;}
+.float-menu .fm-center{width:50px;height:50px;font-size:1.3rem;}
+.panel{max-width:100%;}
+}
+.guide-section{margin-bottom:20px;}
+.guide-section h3{color:var(--accent);font-size:1rem;margin-bottom:8px;}
+.guide-section p{font-size:.88rem;color:var(--text2);line-height:1.6;margin-bottom:8px;}
+.lang-btn-group{display:flex;flex-wrap:wrap;gap:8px;}
+.lang-btn{padding:8px 16px;border-radius:12px;border:1px solid var(--border);background:var(--card);color:var(--text);cursor:pointer;font-size:.88rem;transition:all .3s;}
+.lang-btn.active,.lang-btn:hover{background:var(--accent);color:var(--bg);border-color:var(--accent);}
+.theme-selector{display:flex;gap:10px;}
+.theme-opt{width:48px;height:48px;border-radius:50%;border:3px solid var(--border);cursor:pointer;transition:all .3s;position:relative;}
+.theme-opt:hover,.theme-opt.active{border-color:var(--accent);transform:scale(1.1);box-shadow:var(--glow);}
+.theme-opt.active::after{content:'✓';position:absolute;inset:0;display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;text-shadow:0 0 4px #000;}
+.note-card{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:12px;margin-bottom:8px;}
+.note-card textarea{width:100%;background:transparent;border:none;color:var(--text);outline:none;resize:vertical;min-height:60px;font-family:inherit;font-size:.88rem;}
+.folder-tag{display:inline-block;padding:2px 8px;background:var(--bg3);border-radius:8px;font-size:.72rem;color:var(--accent);margin-right:4px;}
+.leaflet-popup-content .popup-btn.go-btn{background:linear-gradient(135deg,#00c853,#00e5ff);color:#000;border-color:#00c853;font-weight:700;letter-spacing:.5px;}
+.leaflet-popup-content .popup-btn.go-btn:hover{background:linear-gradient(135deg,#00e676,#18ffff);box-shadow:0 0 12px rgba(0,200,83,.5);}
+/* ── CATEGORY BAR WITH DROPDOWNS ── */
+.cats-bar{background:var(--bg2);padding:6px 10px;display:flex;gap:6px;overflow-x:auto;border-bottom:1px solid var(--border);-webkit-overflow-scrolling:touch;align-items:center;flex-wrap:nowrap;}
+.cats-bar::-webkit-scrollbar{height:3px;}
+.cat-group{position:relative;flex-shrink:0;}
+.cat-group-btn{background:var(--card);border:1px solid var(--border);color:var(--text);padding:6px 12px;border-radius:20px;font-size:.76rem;cursor:pointer;transition:all .3s;display:flex;align-items:center;gap:5px;white-space:nowrap;user-select:none;}
+.cat-group-btn:hover,.cat-group-btn.open{background:var(--accent);color:var(--bg);border-color:var(--accent);box-shadow:var(--glow);}
+.cat-group-btn i{font-size:.8rem;}
+.cat-group-btn .caret{font-size:.6rem;margin-left:2px;transition:transform .2s;}
+.cat-group-btn.open .caret{transform:rotate(180deg);}
+.cat-dropdown{display:none;position:absolute;top:calc(100% + 6px);left:0;z-index:400;background:var(--menu-bg);border:1px solid var(--border);border-radius:12px;padding:6px;min-width:180px;box-shadow:var(--shadow);backdrop-filter:blur(16px);max-height:320px;overflow-y:auto;}
+.cat-group.open .cat-dropdown{display:block;animation:fadeUp .18s ease;}
+@keyframes fadeUp{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
+.cat-dropdown .cat-chip{display:flex;width:100%;border-radius:8px;margin-bottom:2px;padding:7px 12px;font-size:.8rem;}
+.cat-dropdown .cat-chip:last-child{margin-bottom:0;}
+/* MTR event button in popup */
+.popup-btn.mtr-events{background:linear-gradient(135deg,#ff6600,#ff9900);color:#fff;border-color:#ff6600;font-weight:700;animation:glowOrange 2s infinite;}
+@keyframes glowOrange{0%,100%{box-shadow:0 0 6px rgba(255,102,0,.4);}50%{box-shadow:0 0 14px rgba(255,153,0,.8);}}
+@keyframes glowGreen{0%,100%{box-shadow:0 0 6px rgba(0,170,68,.4);}50%{box-shadow:0 0 14px rgba(0,255,136,.8);}}
+/* NAV BAR */
+#navBar{position:fixed;bottom:80px;left:12px;right:12px;z-index:2500;background:rgba(10,10,46,.96);border:1px solid var(--border);border-radius:16px;padding:12px 16px;display:none;backdrop-filter:blur(16px);box-shadow:var(--shadow),var(--glow);transition:all .3s;}
+#navBar.active{display:block;}
+#navBar .nav-dest{font-size:.78rem;color:var(--text2);margin-bottom:4px;}
+#navBar .nav-inst{font-size:1rem;font-weight:700;color:var(--accent);display:flex;align-items:center;gap:8px;}
+#navBar .nav-dist{font-size:.82rem;color:var(--text2);margin-top:4px;}
+#navBar .nav-actions{display:flex;gap:8px;margin-top:10px;}
+#navBar .nav-stop{background:#ff3355;color:#fff;border:none;padding:6px 16px;border-radius:12px;cursor:pointer;font-size:.82rem;font-weight:600;}
+#navBar .nav-tts-btn{background:var(--card);border:1px solid var(--border);color:var(--text);padding:6px 12px;border-radius:12px;cursor:pointer;font-size:.82rem;}
+#navBar .nav-progress{height:4px;background:var(--bg3);border-radius:2px;margin-top:8px;overflow:hidden;}
+#navBar .nav-progress-bar{height:100%;background:linear-gradient(90deg,var(--accent),var(--accent2));border-radius:2px;transition:width .5s;}
+/* SCAN BUBBLE */
+#scanBubble{position:fixed;top:70px;left:50%;transform:translateX(-50%);z-index:3500;background:var(--card);border:1px solid var(--border);border-radius:16px;padding:12px 18px;display:none;max-width:340px;width:90%;backdrop-filter:blur(16px);box-shadow:var(--shadow);animation:slideDown .4s;}
+#scanBubble .sb-title{font-weight:700;color:var(--accent);font-size:.9rem;margin-bottom:6px;}
+#scanBubble .sb-list{font-size:.8rem;color:var(--text2);max-height:120px;overflow-y:auto;margin-bottom:10px;}
+#scanBubble .sb-actions{display:flex;gap:8px;}
+#scanBubble button{flex:1;padding:6px 10px;border-radius:10px;border:1px solid var(--border);background:var(--bg3);color:var(--text);cursor:pointer;font-size:.8rem;}
+#scanBubble button.primary{background:var(--accent);color:var(--bg);border-color:var(--accent);}
+</style>
+</head>
+<body data-theme="dark">
+
+<div id="splash">
+<svg viewBox="0 0 512 512"><rect width="512" height="512" rx="100" fill="var(--bg)"></rect><path d="M256 80c-77 0-140 63-140 140 0 60 100 180 140 220 40-40 140-160 140-220 0-77-63-140-140-140z" fill="var(--accent)" opacity=".9"></path><circle cx="256" cy="210" r="50" fill="var(--bg)"></circle><text x="256" y="228" text-anchor="middle" fill="var(--accent)" font-family="Arial Black" font-size="48">A?</text></svg>
+<h1 style="color:var(--accent)">¿A Donde?</h1>
+<p>去邊度？ · Where to?</p>
+<p style="margin-top:16px;font-size:.75rem;color:var(--text2)">Cargando...</p>
+</div>
+
+<div class="offline-bar" id="offlineBar">📡 <span data-i18n="offline">Modo sin conexión - Usando datos locales</span></div>
+
+<div id="installBanner" class="install-banner">
+<i class="fas fa-download"></i>
+<span data-i18n="install_msg">Instala ¿A Donde? en tu dispositivo</span>
+<button onclick="installPWA()" data-i18n="install_btn">Instalar</button>
+<span class="close-ib" onclick="dismissInstall()">×</span>
+</div>
+
+<div class="app" id="app">
+<header class="header">
+<div class="logo-wrap" onclick="resetMap()">
+<svg viewBox="0 0 512 512" width="40" height="40" id="mainLogo">
+<defs><linearGradient id="lg1" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="var(--accent)"></stop><stop offset="100%" stop-color="var(--accent2)"></stop></linearGradient></defs>
+<path d="M256 40c-99 0-180 81-180 180 0 80 120 212 180 272 60-60 180-192 180-272 0-99-81-180-180-180z" fill="url(#lg1)" opacity=".9"></path>
+<circle cx="256" cy="208" r="65" fill="var(--bg)"></circle>
+<text x="256" y="230" text-anchor="middle" fill="var(--accent)" font-family="Arial Black" font-size="62">A?</text>
+</svg>
+<div class="logo-text">
+<span class="main">¿A Donde?</span>
+<span class="sub">去邊度？</span>
+<span class="sub">Where to?</span>
+</div>
+</div>
+<div class="header-actions">
+<button class="hdr-btn" onclick="togglePanel('guide')" title="Guía"><i class="fas fa-book"></i></button>
+<button class="hdr-btn" onclick="showLangModal()" title="Idioma"><i class="fas fa-language"></i></button>
+<button class="hdr-btn" onclick="togglePanel('settings')" title="Ajustes"><i class="fas fa-cog"></i></button>
+</div>
+</header>
+
+<div class="search-wrap">
+<input type="text" class="search-input" id="searchInput" data-i18n-placeholder="search_placeholder" placeholder="Buscar lugar, autobús, dirección..." oninput="filterPlaces(this.value)">
+<button class="search-btn" id="voiceBtn" onclick="toggleVoice()" title="Búsqueda por voz"><i class="fas fa-microphone"></i></button>
+<button class="search-btn" onclick="doSearch()" style="background:var(--accent2)"><i class="fas fa-search"></i></button>
+</div>
+
+<div id="catsBar" class="cats-bar">
+<!-- Quick singles -->
+<div class="cat-chip active" onclick="filterCategory('all')" data-cat="all"><i class="fas fa-globe"></i> Todo</div>
+<div class="cat-chip" onclick="filterCategory('mtr')" data-cat="mtr"><i class="fas fa-train"></i> MTR</div>
+
+<!-- TRANSPORTE -->
+<div class="cat-group" id="grpTransport">
+  <div class="cat-group-btn" onclick="toggleCatGroup('grpTransport')"><i class="fas fa-bus"></i> Transporte <i class="fas fa-chevron-down caret"></i></div>
+  <div class="cat-dropdown">
+    <div class="cat-chip" onclick="filterCategory('bus');closeCatGroups()" data-cat="bus"><i class="fas fa-bus"></i> Autobuses KMB/CTB</div>
+    <div class="cat-chip" onclick="filterCategory('minibus');closeCatGroups()" data-cat="minibus"><i class="fas fa-shuttle-van"></i> Minibús</div>
+    <div class="cat-chip" onclick="filterCategory('taxi');closeCatGroups()" data-cat="taxi"><i class="fas fa-taxi"></i> Taxi</div>
+    <div class="cat-chip" onclick="filterCategory('ferry');closeCatGroups()" data-cat="ferry"><i class="fas fa-ship"></i> Ferry / Star Ferry</div>
+    <div class="cat-chip" onclick="filterCategory('tram');closeCatGroups()" data-cat="tram"><i class="fas fa-tram"></i> Tram / Peak Tram</div>
+  </div>
+</div>
+
+<!-- COMPRAS -->
+<div class="cat-group" id="grpShops">
+  <div class="cat-group-btn" onclick="toggleCatGroup('grpShops')"><i class="fas fa-shopping-bag"></i> Compras <i class="fas fa-chevron-down caret"></i></div>
+  <div class="cat-dropdown">
+    <div class="cat-chip" onclick="filterCategory('mall');closeCatGroups()" data-cat="mall"><i class="fas fa-building"></i> Centros Comerciales</div>
+    <div class="cat-chip" onclick="filterCategory('7eleven');closeCatGroups()" data-cat="7eleven"><i class="fas fa-store"></i> 7-Eleven</div>
+    <div class="cat-chip" onclick="filterCategory('parkshop');closeCatGroups()" data-cat="parkshop"><i class="fas fa-shopping-cart"></i> ParkShop</div>
+    <div class="cat-chip" onclick="filterCategory('wellcome');closeCatGroups()" data-cat="wellcome"><i class="fas fa-shopping-basket"></i> Wellcome 惠康</div>
+    <div class="cat-chip" onclick="filterCategory('meaning');closeCatGroups()" data-cat="meaning"><i class="fas fa-shopping-bag"></i> Meaning</div>
+    <div class="cat-chip" onclick="filterCategory('market');closeCatGroups()" data-cat="market"><i class="fas fa-store-alt"></i> Mercados / Wet Market</div>
+  </div>
+</div>
+
+<!-- FAMILIA & OCIO -->
+<div class="cat-group" id="grpFamily">
+  <div class="cat-group-btn" onclick="toggleCatGroup('grpFamily')"><i class="fas fa-child"></i> Familia <i class="fas fa-chevron-down caret"></i></div>
+  <div class="cat-dropdown">
+    <div class="cat-chip" onclick="filterCategory('playroom');closeCatGroups()" data-cat="playroom"><i class="fas fa-puzzle-piece"></i> Play Rooms</div>
+    <div class="cat-chip" onclick="filterCategory('park');closeCatGroups()" data-cat="park"><i class="fas fa-tree"></i> Parques y Zonas de Juego</div>
+    <div class="cat-chip" onclick="filterCategory('waterfront');closeCatGroups()" data-cat="waterfront"><i class="fas fa-water"></i> Paseos Marítimos</div>
+    <div class="cat-chip" onclick="filterCategory('theme');closeCatGroups()" data-cat="theme"><i class="fas fa-dragon"></i> Parques Temáticos</div>
+    <div class="cat-chip" onclick="filterCategory('zoo');closeCatGroups()" data-cat="zoo"><i class="fas fa-paw"></i> Zoológicos / Acuarios</div>
+    <div class="cat-chip" onclick="filterCategory('adventure');closeCatGroups()" data-cat="adventure"><i class="fas fa-mountain"></i> Aventura Outdoor/Indoor</div>
+    <div class="cat-chip" onclick="filterCategory('cycling');closeCatGroups()" data-cat="cycling"><i class="fas fa-bicycle"></i> Alquiler Bicicletas</div>
+  </div>
+</div>
+
+<!-- CULTURA & ARTE -->
+<div class="cat-group" id="grpCulture">
+  <div class="cat-group-btn" onclick="toggleCatGroup('grpCulture')"><i class="fas fa-landmark"></i> Cultura <i class="fas fa-chevron-down caret"></i></div>
+  <div class="cat-dropdown">
+    <div class="cat-chip" onclick="filterCategory('museum');closeCatGroups()" data-cat="museum"><i class="fas fa-university"></i> Museos Interactivos</div>
+    <div class="cat-chip" onclick="filterCategory('library');closeCatGroups()" data-cat="library"><i class="fas fa-book"></i> Bibliotecas / Facility</div>
+    <div class="cat-chip" onclick="filterCategory('art');closeCatGroups()" data-cat="art"><i class="fas fa-palette"></i> Arte y Talleres Creativos</div>
+    <div class="cat-chip" onclick="filterCategory('science');closeCatGroups()" data-cat="science"><i class="fas fa-atom"></i> Centros de Ciencia</div>
+    <div class="cat-chip" onclick="filterCategory('temple');closeCatGroups()" data-cat="temple"><i class="fas fa-place-of-worship"></i> Templos / Patrimonio</div>
+  </div>
+</div>
+
+<!-- GASTRONOMÍA -->
+<div class="cat-group" id="grpFood">
+  <div class="cat-group-btn" onclick="toggleCatGroup('grpFood')"><i class="fas fa-utensils"></i> Gastronomía <i class="fas fa-chevron-down caret"></i></div>
+  <div class="cat-dropdown">
+    <div class="cat-chip" onclick="filterCategory('restaurant');closeCatGroups()" data-cat="restaurant"><i class="fas fa-utensils"></i> Restaurantes</div>
+    <div class="cat-chip" onclick="filterCategory('familydining');closeCatGroups()" data-cat="familydining"><i class="fas fa-users"></i> Zonas Gastronómicas Familiares</div>
+    <div class="cat-chip" onclick="filterCategory('delivery');closeCatGroups()" data-cat="delivery"><i class="fas fa-motorcycle"></i> Delivery</div>
+    <div class="cat-chip" onclick="filterCategory('cafe');closeCatGroups()" data-cat="cafe"><i class="fas fa-coffee"></i> Cafés / Milk Tea</div>
+    <div class="cat-chip" onclick="filterCategory('dimsum');closeCatGroups()" data-cat="dimsum"><i class="fas fa-bowl-rice"></i> Dim Sum / Yum Cha</div>
+  </div>
+</div>
+
+<!-- SERVICIOS -->
+<div class="cat-group" id="grpServices">
+  <div class="cat-group-btn" onclick="toggleCatGroup('grpServices')"><i class="fas fa-concierge-bell"></i> Servicios <i class="fas fa-chevron-down caret"></i></div>
+  <div class="cat-dropdown">
+    <div class="cat-chip" onclick="filterCategory('hospital');closeCatGroups()" data-cat="hospital"><i class="fas fa-hospital"></i> Hospitales / Clínicas</div>
+    <div class="cat-chip" onclick="filterCategory('parcel');closeCatGroups()" data-cat="parcel"><i class="fas fa-box"></i> Paquetería / SF Express</div>
+    <div class="cat-chip" onclick="filterCategory('pharmacy');closeCatGroups()" data-cat="pharmacy"><i class="fas fa-pills"></i> Farmacias / Watsons</div>
+    <div class="cat-chip" onclick="filterCategory('bank');closeCatGroups()" data-cat="bank"><i class="fas fa-university"></i> Bancos / ATM</div>
+    <div class="cat-chip" onclick="filterCategory('hotel');closeCatGroups()" data-cat="hotel"><i class="fas fa-hotel"></i> Hoteles</div>
+  </div>
+</div>
+</div>
+
+<div id="map"></div>
+
+<div class="zoom-ctrls">
+<button onclick="map.zoomIn()">+</button>
+<button onclick="map.zoomOut()">−</button>
+</div>
+<div id="speedHud" style="display:none;position:fixed;bottom:150px;left:16px;z-index:1500;background:var(--card);border:2px solid var(--accent);border-radius:12px;padding:8px 12px;text-align:center;backdrop-filter:blur(8px);min-width:56px;">
+  <div id="speedVal" style="font-size:1.4rem;font-weight:700;color:var(--accent);line-height:1">0</div>
+  <div style="font-size:.55rem;color:var(--text2)">km/h</div>
+</div>
+<button class="loc-btn" onclick="locateUser()" title="Mi ubicación"><i class="fas fa-crosshairs"></i></button>
+
+<nav class="float-menu">
+<button class="fm-btn active" onclick="switchView('map')"><i class="fas fa-map"></i><span data-i18n="nav_map">Mapa</span></button>
+<button class="fm-btn" onclick="togglePanel('favorites')"><i class="fas fa-star"></i><span data-i18n="nav_fav">Favoritos</span></button>
+<button class="fm-center" onclick="locateUser()"><i class="fas fa-location-arrow"></i></button>
+<button class="fm-btn" onclick="togglePanel('links')"><i class="fas fa-link"></i><span>Links</span></button>
+<button class="fm-btn" onclick="togglePanel('notes')"><i class="fas fa-sticky-note"></i><span data-i18n="nav_notes">Notas</span></button>
+</nav>
+</div>
+
+<!-- PANEL: Favoritos -->
+<div class="panel" id="panelFavorites">
+<div class="panel-hdr"><h2><i class="fas fa-star" style="color:var(--accent3)"></i> <span data-i18n="fav_title">Favoritos</span></h2><button class="panel-close" onclick="closePanel('favorites')">×</button></div>
+<div class="panel-body" id="favList"><p style="color:var(--text2);text-align:center;padding:40px 0" data-i18n="fav_empty">No hay favoritos aún. Toca ⭐ en un lugar para guardarlo.</p></div>
+</div>
+
+<!-- PANEL: Settings -->
+<div class="panel" id="panelSettings">
+<div class="panel-hdr"><h2><i class="fas fa-cog"></i> <span data-i18n="settings_title">Ajustes</span></h2><button class="panel-close" onclick="closePanel('settings')">×</button></div>
+<div class="panel-body">
+
+<div class="panel-section">
+<h3><i class="fas fa-palette"></i> <span data-i18n="set_theme">Tema</span></h3>
+<div class="theme-selector">
+<div class="theme-opt" style="background:linear-gradient(135deg,#f0f4f8,#ccc)" onclick="setTheme('light')" data-thopt="light"></div>
+<div class="theme-opt active" style="background:linear-gradient(135deg,#0a0a2e,#1a1a4e)" onclick="setTheme('dark')" data-thopt="dark"></div>
+<div class="theme-opt" style="background:linear-gradient(135deg,#0d001a,#ff00ff)" onclick="setTheme('neon')" data-thopt="neon"></div>
+</div>
+</div>
+
+<div class="panel-section">
+<h3><i class="fas fa-language"></i> <span data-i18n="set_lang">Idioma</span></h3>
+<div class="lang-btn-group">
+<button class="lang-btn active" onclick="setLang('es')" data-lang="es">🇪🇸 Español</button>
+<button class="lang-btn" onclick="setLang('en')" data-lang="en">🇬🇧 English</button>
+<button class="lang-btn" onclick="setLang('zh-HK')" data-lang="zh-HK">🇭🇰 廣東話</button>
+<button class="lang-btn" onclick="setLang('zh-CN')" data-lang="zh-CN">🇨🇳 中文</button>
+</div>
+</div>
+
+<div class="panel-section">
+<h3><i class="fas fa-volume-up"></i> <span data-i18n="set_sound">Sonido</span></h3>
+<div class="toggle-row"><label data-i18n="set_sound_enable">Sonidos de botones</label><div class="toggle" id="toggleSound" onclick="toggleSetting('sound')"></div></div>
+<div class="toggle-row"><label>🔊 Voz TTS en navegación</label><div class="toggle" id="toggleTTS" onclick="toggleSetting('tts')"></div></div>
+<div class="form-group" style="margin-top:10px"><label>Idioma de avisos TTS</label>
+<select class="form-input" id="ttsLangSel" onchange="APP.ttsLang=this.value;saveState()">
+  <option value="en-GB">🇬🇧 English</option>
+  <option value="es-ES">🇪🇸 Español</option>
+  <option value="zh-HK">🇭🇰 廣東話</option>
+  <option value="zh-CN">🇨🇳 普通話</option>
+</select></div>
+<button class="form-btn" style="margin-top:6px" onclick="testTTS()"><i class="fas fa-play"></i> Probar voz</button>
+</div>
+
+<div class="panel-section">
+<h3><i class="fas fa-satellite-dish"></i> Escaneo de lugares</h3>
+<div class="toggle-row"><label>📡 Escaneo persistente activo</label><div class="toggle" id="toggleScan" onclick="toggleSetting('scan')"></div></div>
+<div class="toggle-row"><label>📅 Guardar historial de escaneo</label><div class="toggle" id="toggleScanHistory" onclick="toggleSetting('scanHistory')"></div></div>
+<button class="form-btn" style="margin-top:8px" onclick="showScanHistory()"><i class="fas fa-history"></i> Ver historial</button>
+</div>
+
+<div class="panel-section">
+<h3><i class="fas fa-map"></i> Opciones de mapa</h3>
+<div class="toggle-row"><label>🧭 Rotar mapa con movimiento</label><div class="toggle" id="toggleMapRotate" onclick="toggleSetting('mapRotate')"></div></div>
+<div class="toggle-row"><label>⚡ Mostrar velocidad GPS</label><div class="toggle" id="toggleSpeed" onclick="toggleSetting('speed')"></div></div>
+<div class="toggle-row"><label>🌙 Tiles oscuros (Carto Dark)</label><div class="toggle" id="toggleDarkTiles" onclick="toggleSetting('darkTiles')"></div></div>
+</div>
+
+<div class="panel-section">
+<h3><i class="fas fa-robot"></i> <span data-i18n="set_ai">APIs de IA</span></h3>
+<div class="form-group"><label>Gemini API Key</label><input class="form-input" id="geminiKey" type="password" placeholder="AIza..."></div>
+<div class="form-group"><label>Groq API Key</label><input class="form-input" id="groqKey" type="password" placeholder="gsk_..."></div>
+<div class="form-group"><label data-i18n="set_ai_model">Modelo preferido</label>
+<select class="form-input" id="aiModel">
+  <optgroup label="Gemini 3 (Latest 2026)">
+    <option value="gemini-3.1-pro-preview">Gemini 3.1 Pro Preview ⭐ (Latest)</option>
+    <option value="gemini-3-flash">Gemini 3 Flash</option>
+    <option value="gemini-3.1-flash-lite">Gemini 3.1 Flash Lite</option>
+  </optgroup>
+  <optgroup label="Gemini 2.5">
+    <option value="gemini-2.5-pro">Gemini 2.5 Pro</option>
+    <option value="gemini-2.5-flash">Gemini 2.5 Flash</option>
+    <option value="gemini-2.5-flash-lite">Gemini 2.5 Flash Lite</option>
+  </optgroup>
+  <optgroup label="Groq">
+    <option value="groq-llama4-scout">Groq - LLaMA 4 Scout (Latest)</option>
+    <option value="groq-llama4-maverick">Groq - LLaMA 4 Maverick</option>
+    <option value="groq-llama3-70b">Groq - LLaMA 3 70B</option>
+    <option value="groq-deepseek-r1">Groq - DeepSeek R1</option>
+    <option value="groq-mixtral">Groq - Mixtral 8x7B</option>
+  </optgroup>
+</select></div>
+<button class="form-btn" onclick="saveAPIKeys()"><i class="fas fa-save"></i> <span data-i18n="save">Guardar</span></button>
+</div>
+
+<div class="panel-section">
+<h3><i class="fas fa-database"></i> <span data-i18n="set_data">Datos</span></h3>
+<button class="form-btn" onclick="downloadAIData()" style="margin-bottom:8px"><i class="fas fa-cloud-download-alt"></i> <span data-i18n="set_dl_data">Descargar nuevos datos con IA</span></button>
+<button class="form-btn" onclick="exportData()" style="margin-bottom:8px"><i class="fas fa-file-export"></i> <span data-i18n="set_export">Exportar datos</span></button>
+<button class="form-btn" onclick="document.getElementById('importFile').click()"><i class="fas fa-file-import"></i> <span data-i18n="set_import">Importar datos</span></button>
+<input type="file" id="importFile" accept=".json" style="display:none" onchange="importData(event)">
+</div>
+
+<div class="panel-section">
+<h3><i class="fas fa-folder-plus"></i> <span data-i18n="set_folders">Carpetas</span></h3>
+<div style="display:flex;gap:8px;margin-bottom:10px;">
+<input class="form-input" id="newFolderName" placeholder="Nombre de carpeta..." style="flex:1">
+<button class="form-btn primary" onclick="createFolder()"><i class="fas fa-plus"></i></button>
+</div>
+<div id="foldersList"></div>
+</div>
+
+<div class="panel-section">
+<h3><i class="fas fa-shield-alt"></i> Admin</h3>
+<button class="form-btn" onclick="showAdminLogin()"><i class="fas fa-lock"></i> <span data-i18n="set_admin">Modo Admin</span></button>
+<div id="adminFeatures" style="display:none;margin-top:12px">
+<button class="form-btn" onclick="togglePanel('aichat')" style="margin-bottom:8px"><i class="fas fa-comments"></i> Chat IA</button>
+<button class="form-btn" onclick="showCustomBtnCreator()" style="margin-bottom:8px"><i class="fas fa-magic"></i> <span data-i18n="set_custom_btn">Crear botones personalizados</span></button>
+<button class="form-btn" onclick="closePanel('settings');document.getElementById('modalAdminMTR').classList.add('show')"
+  style="margin-bottom:8px;background:linear-gradient(135deg,#ff6600,#ff9900);color:#fff;border-color:#ff6600;animation:glowOrange 2s infinite">
+  <i class="fas fa-train"></i> Datos Especiales por MTR
+</button>
+</div>
+</div>
+
+<div class="footer-info">
+<p>© 2026 ¿A Donde? App. Todos los derechos reservados.</p>
+<p style="margin-top:6px">Creado por <a href="https://www.linkedin.com/in/jaime-andr%C3%A9s-due%C3%B1as-vicu%C3%B1a" target="_blank">Jaime Andrés Dueñas Vicuña <i class="fab fa-linkedin" style="color:#0a66c2"></i></a></p>
+<p style="margin-top:4px"><a href="https://www.paypal.com/paypalme/texiduvi" target="_blank"><i class="fab fa-paypal" style="color:#003087"></i> PayPal</a></p>
+</div>
+</div>
+</div>
+
+<!-- PANEL: AI Chat (Admin) -->
+<div class="panel" id="panelAichat">
+<div class="panel-hdr"><h2><i class="fas fa-robot"></i> Chat IA (Admin)</h2><button class="panel-close" onclick="closePanel('aichat')">×</button></div>
+<div class="panel-body ai-chat" style="padding:0">
+<div class="ai-messages" id="aiMessages"><div class="ai-msg bot">¡Hola! Soy tu asistente IA. Puedo buscar lugares, añadir datos nuevos o ayudarte a configurar la app. ¿Qué necesitas?</div></div>
+<div class="ai-input-wrap">
+<textarea class="ai-input" id="aiInput" rows="2" placeholder="Escribe un mensaje..."></textarea>
+<button class="search-btn" onclick="sendAIMessage()" style="background:var(--accent)"><i class="fas fa-paper-plane"></i></button>
+</div>
+</div>
+</div>
+
+<!-- PANEL: Links (Pocket style) -->
+<div class="panel" id="panelLinks">
+<div class="panel-hdr"><h2><i class="fas fa-link"></i> Links Guardados</h2><button class="panel-close" onclick="closePanel('links')">×</button></div>
+<div class="panel-body">
+<div style="display:flex;gap:8px;margin-bottom:16px">
+<input class="form-input" id="newLinkUrl" placeholder="https://..." style="flex:1">
+<button class="form-btn primary" onclick="saveLink()"><i class="fas fa-plus"></i></button>
+</div>
+<div id="linksList"></div>
+</div>
+</div>
+
+<!-- PANEL: Notes -->
+<div class="panel" id="panelNotes">
+<div class="panel-hdr"><h2><i class="fas fa-sticky-note"></i> <span data-i18n="notes_title">Notas</span></h2><button class="panel-close" onclick="closePanel('notes')">×</button></div>
+<div class="panel-body">
+<div style="display:flex;gap:8px;margin-bottom:16px">
+<select class="form-input" id="noteFolderSelect" style="flex:1"><option value="">Sin carpeta</option></select>
+<button class="form-btn primary" onclick="createNote()"><i class="fas fa-plus"></i></button>
+</div>
+<div id="notesList"></div>
+</div>
+</div>
+
+<!-- PANEL: Guide -->
+<div class="panel" id="panelGuide">
+<div class="panel-hdr"><h2><i class="fas fa-book"></i> <span data-i18n="guide_title">Manual y Guía</span></h2><button class="panel-close" onclick="closePanel('guide')">×</button></div>
+<div class="panel-body" id="guideContent"></div>
+</div>
+
+<!-- MODAL: Scan History -->
+<div class="modal-overlay" id="modalScanHistory">
+<div class="modal" style="max-width:480px">
+<h2><i class="fas fa-history"></i> Historial de escaneo</h2>
+<div id="scanHistoryContent" style="max-height:50vh;overflow-y:auto;font-size:.85rem;color:var(--text2);margin-top:8px"></div>
+<button class="form-btn" style="margin-top:16px" onclick="closeModal('modalScanHistory')">Cerrar</button>
+</div>
+</div>
+
+<!-- MODAL: Admin Login -->
+<div class="modal-overlay" id="modalAdmin">
+<div class="modal">
+<h2><i class="fas fa-lock"></i> Acceso Admin</h2>
+<div style="display:flex;gap:6px;background:var(--bg3);border-radius:10px;padding:4px;margin-bottom:14px">
+  <button id="adminTabPass" class="tab active" onclick="switchAdminTab('pass')" style="flex:1">🔑 Contraseña</button>
+  <button id="adminTabJson" class="tab" onclick="switchAdminTab('json')" style="flex:1">📄 JSON Key</button>
+</div>
+<div id="adminSectionPass">
+  <div class="form-group"><label>Contraseña maestra</label><input class="form-input" type="password" id="adminPassInput" placeholder="Ingresa la contraseña..."></div>
+  <div style="display:flex;gap:8px;margin-top:16px">
+    <button class="form-btn primary" onclick="verifyAdmin()"><i class="fas fa-key"></i> Verificar</button>
+    <button class="form-btn" onclick="closeModal('modalAdmin')">Cancelar</button>
+  </div>
+</div>
+<div id="adminSectionJson" style="display:none">
+  <p style="font-size:.82rem;color:var(--text2);margin-bottom:10px">Sube el archivo <strong>master_key.json</strong> para activar el modo admin.</p>
+  <input type="file" id="adminKeyFile" accept=".json" style="display:none" onchange="verifyAdminJSON(event)">
+  <button class="form-btn primary" style="width:100%;margin-bottom:8px" onclick="document.getElementById('adminKeyFile').click()">
+    <i class="fas fa-upload"></i> Cargar master_key.json
+  </button>
+  <div id="adminJsonStatus" style="font-size:.82rem;margin-top:8px"></div>
+  <button class="form-btn" style="width:100%;margin-top:8px" onclick="closeModal('modalAdmin')">Cancelar</button>
+</div>
+</div>
+</div>
+
+<!-- MODAL: Language -->
+<div class="modal-overlay" id="modalLang">
+<div class="modal">
+<h2><i class="fas fa-language"></i> <span data-i18n="choose_lang">Elegir idioma</span></h2>
+<div class="lang-btn-group" style="margin-top:12px">
+<button class="lang-btn" onclick="setLang('es');closeModal('modalLang')" data-lang="es">🇪🇸 Español</button>
+<button class="lang-btn" onclick="setLang('en');closeModal('modalLang')" data-lang="en">🇬🇧 English</button>
+<button class="lang-btn" onclick="setLang('zh-HK');closeModal('modalLang')" data-lang="zh-HK">🇭🇰 廣東話</button>
+<button class="lang-btn" onclick="setLang('zh-CN');closeModal('modalLang')" data-lang="zh-CN">🇨🇳 中文</button>
+</div>
+</div>
+</div>
+
+<!-- MODAL: Custom Button Creator (Admin) -->
+<div class="modal-overlay" id="modalCustomBtn">
+<div class="modal">
+<h2><i class="fas fa-magic"></i> Crear Botón Personalizado</h2>
+<p style="font-size:.82rem;color:var(--text2);margin-bottom:12px">🔒 Función Premium - Solo Admin</p>
+<div class="form-group"><label>Nombre</label><input class="form-input" id="cbName" placeholder="Mi sitio"></div>
+<div class="form-group"><label>URL / Link</label><input class="form-input" id="cbUrl" placeholder="https://..."></div>
+<div class="form-group"><label>Color</label>
+<div style="display:flex;gap:6px;flex-wrap:wrap">
+<span class="form-btn" style="background:#ff3355;color:#fff;padding:6px 12px" onclick="document.getElementById('cbColor').value='#ff3355'">#ff3355</span>
+<span class="form-btn" style="background:#00cc88;color:#fff;padding:6px 12px" onclick="document.getElementById('cbColor').value='#00cc88'">#00cc88</span>
+<span class="form-btn" style="background:#3366ff;color:#fff;padding:6px 12px" onclick="document.getElementById('cbColor').value='#3366ff'">#3366ff</span>
+<span class="form-btn" style="background:#ff9900;color:#fff;padding:6px 12px" onclick="document.getElementById('cbColor').value='#ff9900'">#ff9900</span>
+<span class="form-btn" style="background:#cc00ff;color:#fff;padding:6px 12px" onclick="document.getElementById('cbColor').value='#cc00ff'">#cc00ff</span>
+</div>
+<input class="form-input" id="cbColor" value="#00f0ff" style="margin-top:6px">
+</div>
+<div class="form-group"><label>Forma</label>
+<select class="form-input" id="cbShape"><option value="rounded">Redondeado</option><option value="circle">Círculo</option><option value="square">Cuadrado</option><option value="pill">Pastilla</option></select>
+</div>
+<div style="display:flex;gap:8px;margin-top:16px">
+<button class="form-btn primary" onclick="createCustomButton()"><i class="fas fa-plus"></i> Crear</button>
+<button class="form-btn" onclick="closeModal('modalCustomBtn')">Cancelar</button>
+</div>
+</div>
+</div>
+
+<!-- MODAL: AI Download Data -->
+<div class="modal-overlay" id="modalAIData">
+<div class="modal">
+<h2><i class="fas fa-cloud-download-alt"></i> Descargar Datos con IA</h2>
+<div class="form-group"><label>Categoría a buscar</label>
+<input class="form-input" id="aiDataQuery" placeholder="Ej: tiendas de ropa, electrónica, cafeterías..."></div>
+<div class="form-group"><label>Área de Hong Kong</label>
+<select class="form-input" id="aiDataArea"><option value="all">Todo Hong Kong</option><option value="hk_island">Hong Kong Island</option><option value="kowloon">Kowloon</option><option value="nt">New Territories</option><option value="lantau">Lantau</option></select></div>
+<div id="aiDataStatus" style="margin:12px 0;font-size:.85rem;color:var(--text2)"></div>
+<div style="display:flex;gap:8px;margin-top:12px">
+<button class="form-btn primary" onclick="fetchAIData()"><i class="fas fa-download"></i> Buscar y Descargar</button>
+<button class="form-btn" onclick="closeModal('modalAIData')">Cerrar</button>
+</div>
+</div>
+</div>
+
+<!-- NAVIGATION BAR -->
+<div id="navBar">
+  <div class="nav-dest" id="navDest">Destino: —</div>
+  <div class="nav-inst"><i class="fas fa-arrow-up" id="navArrow"></i> <span id="navInstText">Calculando ruta...</span></div>
+  <div class="nav-dist" id="navDistText">— m restantes</div>
+  <div class="nav-progress"><div class="nav-progress-bar" id="navProgressBar" style="width:0%"></div></div>
+  <div class="nav-actions">
+    <button class="nav-stop" onclick="stopNavigation()"><i class="fas fa-times"></i> Parar</button>
+    <button class="nav-tts-btn" id="navTtsBtn" onclick="toggleNavTTS()"><i class="fas fa-volume-up"></i> Voz</button>
+    <button class="nav-tts-btn" onclick="repeatLastInstruction()"><i class="fas fa-redo"></i> Repetir</button>
+  </div>
+</div>
+
+<!-- SCAN BUBBLE -->
+<div id="scanBubble">
+  <div class="sb-title"><i class="fas fa-satellite-dish"></i> Nuevos lugares detectados</div>
+  <div class="sb-list" id="scanBubbleList"></div>
+  <div class="sb-actions">
+    <button class="primary" onclick="confirmScanAdd()"><i class="fas fa-plus"></i> Añadir todos</button>
+    <button onclick="dismissScanBubble()"><i class="fas fa-times"></i> Ignorar</button>
+  </div>
+</div>
+
+<!-- MODAL: MTR Events & Offers -->
+<div class="modal-overlay" id="modalMTREvents">
+<div class="modal" style="max-width:520px;width:95%">
+  <h2><i class="fas fa-calendar-star" style="color:#ff6600"></i> Eventos y Ofertas MTR</h2>
+  <div id="mtrEventsStation" style="font-size:.82rem;color:var(--text2);margin-bottom:10px"></div>
+  <!-- Calendar filter -->
+  <div style="display:flex;gap:8px;margin-bottom:12px;flex-wrap:wrap;align-items:center">
+    <input type="date" class="form-input" id="mtrDateFrom" style="flex:1;min-width:130px">
+    <span style="color:var(--text2);font-size:.8rem">a</span>
+    <input type="date" class="form-input" id="mtrDateTo" style="flex:1;min-width:130px">
+    <button class="form-btn primary" onclick="filterMTREventsByDate()" style="padding:8px 14px"><i class="fas fa-filter"></i></button>
+  </div>
+  <div style="display:flex;gap:6px;margin-bottom:12px;flex-wrap:wrap">
+    <button class="form-btn" style="font-size:.75rem;padding:5px 10px" onclick="setMTRDateRange(1)">Hoy</button>
+    <button class="form-btn" style="font-size:.75rem;padding:5px 10px" onclick="setMTRDateRange(7)">7 días</button>
+    <button class="form-btn" style="font-size:.75rem;padding:5px 10px" onclick="setMTRDateRange(30)">1 mes</button>
+    <button class="form-btn" style="font-size:.75px;padding:5px 10px" onclick="setMTRDateRange(90)">3 meses</button>
+  </div>
+  <div id="mtrEventsLoading" style="display:none;text-align:center;padding:20px;color:var(--text2)"><i class="fas fa-spinner fa-spin"></i> Buscando con IA...</div>
+  <div id="mtrEventsList" style="max-height:45vh;overflow-y:auto"></div>
+  <div style="display:flex;gap:8px;margin-top:14px">
+    <button class="form-btn primary" onclick="loadMTREventsAI()" style="flex:1"><i class="fas fa-robot"></i> Actualizar con IA</button>
+    <button class="form-btn" onclick="closeModal('modalMTREvents')">Cerrar</button>
+  </div>
+</div>
+</div>
+
+<!-- MODAL: Admin MTR Data Loader -->
+<div class="modal-overlay" id="modalAdminMTR">
+<div class="modal" style="max-width:480px">
+  <h2><i class="fas fa-train" style="color:#ff6600"></i> Cargar Datos por Zona MTR</h2>
+  <p style="font-size:.8rem;color:var(--text2);margin-bottom:14px">Carga ofertas, eventos y descuentos de los alrededores de cada estación MTR usando IA.</p>
+  <div class="form-group">
+    <label>Seleccionar estación MTR</label>
+    <select class="form-input" id="adminMTRSelect" style="margin-bottom:10px">
+      <option value="">-- Selecciona estación --</option>
+      <option value="Central">Central 中環</option>
+      <option value="Admiralty">Admiralty 金鐘</option>
+      <option value="Wan Chai">Wan Chai 灣仔</option>
+      <option value="Causeway Bay">Causeway Bay 銅鑼灣</option>
+      <option value="Tsim Sha Tsui">Tsim Sha Tsui 尖沙咀</option>
+      <option value="Mong Kok">Mong Kok 旺角</option>
+      <option value="Jordan">Jordan 佐敦</option>
+      <option value="Yau Ma Tei">Yau Ma Tei 油麻地</option>
+      <option value="Prince Edward">Prince Edward 太子</option>
+      <option value="Sham Shui Po">Sham Shui Po 深水埗</option>
+      <option value="Diamond Hill">Diamond Hill 鑽石山</option>
+      <option value="Sha Tin">Sha Tin 沙田</option>
+      <option value="Tung Chung">Tung Chung 東涌</option>
+      <option value="North Point">North Point 北角</option>
+      <option value="Kwun Tong">Kwun Tong 觀塘</option>
+      <option value="Tuen Mun">Tuen Mun 屯門</option>
+      <option value="Yuen Long">Yuen Long 元朗</option>
+      <option value="Mei Foo">Mei Foo 美孚</option>
+      <option value="Tsuen Wan">Tsuen Wan 荃灣</option>
+      <option value="Lai King">Lai King 荔景</option>
+      <option value="Wong Tai Sin">Wong Tai Sin 黃大仙</option>
+    </select>
+  </div>
+  <div style="display:flex;gap:8px;margin-bottom:14px;flex-wrap:wrap">
+    <input type="date" class="form-input" id="adminMTRDateFrom" placeholder="Desde" style="flex:1;min-width:120px">
+    <input type="date" class="form-input" id="adminMTRDateTo" placeholder="Hasta" style="flex:1;min-width:120px">
+  </div>
+  <div id="adminMTRStatus" style="font-size:.82rem;color:var(--text2);margin-bottom:10px;min-height:20px"></div>
+  <div style="display:flex;gap:8px;flex-wrap:wrap">
+    <button class="form-btn" onclick="loadSingleMTR()"
+      style="flex:1;background:linear-gradient(135deg,#ff6600,#ff9900);color:#fff;border-color:#ff6600;font-weight:700;animation:glowOrange 2s infinite">
+      <i class="fas fa-bolt"></i> Cargar este MTR
+    </button>
+    <button class="form-btn" onclick="loadAllMTR()"
+      style="flex:1;background:linear-gradient(135deg,#00aa44,#00ff88);color:#000;border-color:#00aa44;font-weight:700;animation:glowGreen 2s infinite">
+      <i class="fas fa-layer-group"></i> Cargar TODOS los MTR
+    </button>
+  </div>
+  <button class="form-btn" onclick="closeModal('modalAdminMTR')" style="width:100%;margin-top:10px">Cerrar</button>
+</div>
+</div>
+
+<!-- MODAL: Transport Mode Selection -->
+<div class="modal-overlay" id="modalTransport">
+<div class="modal" style="max-width:360px">
+  <h2><i class="fas fa-route" style="color:var(--accent)"></i> Go / 去 — 選擇方式</h2>
+  <p id="transportDestName" style="font-size:.85rem;color:var(--text2);margin-bottom:14px"></p>
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:16px">
+    <button class="form-btn transport-mode-btn" onclick="selectTransportMode('foot')" data-mode="foot" style="flex-direction:column;height:64px;gap:4px">
+      <i class="fas fa-walking" style="font-size:1.4rem"></i><span style="font-size:.75rem">A pie / 步行</span>
+    </button>
+    <button class="form-btn transport-mode-btn" onclick="selectTransportMode('mtr')" data-mode="mtr" style="flex-direction:column;height:64px;gap:4px">
+      <i class="fas fa-train" style="font-size:1.4rem;color:#e60012"></i><span style="font-size:.75rem">MTR 地鐵</span>
+    </button>
+    <button class="form-btn transport-mode-btn" onclick="selectTransportMode('bus')" data-mode="bus" style="flex-direction:column;height:64px;gap:4px">
+      <i class="fas fa-bus" style="font-size:1.4rem;color:#f7941e"></i><span style="font-size:.75rem">Bus 巴士</span>
+    </button>
+    <button class="form-btn transport-mode-btn" onclick="selectTransportMode('minibus')" data-mode="minibus" style="flex-direction:column;height:64px;gap:4px">
+      <i class="fas fa-shuttle-van" style="font-size:1.4rem;color:#FFB300"></i><span style="font-size:.75rem">小巴 Minibus</span>
+    </button>
+    <button class="form-btn transport-mode-btn" onclick="selectTransportMode('taxi')" data-mode="taxi" style="flex-direction:column;height:64px;gap:4px">
+      <i class="fas fa-taxi" style="font-size:1.4rem;color:#FF0000"></i><span style="font-size:.75rem">Taxi 的士</span>
+    </button>
+    <button class="form-btn transport-mode-btn" onclick="selectTransportMode('driving')" data-mode="driving" style="flex-direction:column;height:64px;gap:4px">
+      <i class="fas fa-car" style="font-size:1.4rem;color:#2979ff"></i><span style="font-size:.75rem">Auto 私家車</span>
+    </button>
+    <button class="form-btn transport-mode-btn" onclick="selectTransportMode('bicycle')" data-mode="bicycle" style="grid-column:1/-1;flex-direction:row;height:48px;gap:8px;justify-content:center">
+      <i class="fas fa-bicycle" style="font-size:1.2rem;color:#00c853"></i><span style="font-size:.8rem">Bicycle 單車</span>
+    </button>
+  </div>
+  <button class="form-btn" onclick="closeModal('modalTransport')" style="width:100%">Cancelar / 取消</button>
+</div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.js"></script>
+<script>
+/* ============================================
+   ¿A DONDE? - COMPLETE PWA APPLICATION
+   © 2026 ¿A Donde? App
+   Created by Jaime Andrés Dueñas Vicuña
+   ============================================ */
+
+// ===== APP STATE =====
+const APP = {
+  lang: 'es',
+  theme: 'dark',
+  isAdmin: false,
+  soundEnabled: false,
+  ttsEnabled: false,
+  ttsLang: 'en-GB',
+  scanEnabled: false,
+  scanHistory: true,
+  mapRotate: false,
+  speedEnabled: false,
+  darkTiles: false,
+  currentCat: 'all',
+  userLat: 22.3193,
+  userLng: 114.1694,
+  hasLocation: false,
+  favorites: [],
+  links: [],
+  notes: [],
+  folders: [],
+  customButtons: [],
+  places: [],
+  apiKeys: { gemini: '', groq: '' },
+  aiModel: 'gemini-3.1-pro-preview',
+  markers: [],
+  userMarker: null
+};
+
+// ===== SHA-256 UTILITY =====
+async function sha256(message) {
+  const msgBuffer = new TextEncoder().encode(message);
+  const hashBuffer = await crypto.subtle.digest('SHA-256', msgBuffer);
+  const hashArray = Array.from(new Uint8Array(hashBuffer));
+  return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+}
+
+// Master Key - SHA-256 hash of admin password
+const MASTER_KEY = {
+  algorithm: "SHA-256",
+  hash: null,
+  role: "admin",
+  permissions: ["all"]
+};
+
+(async () => {
+  MASTER_KEY.hash = await sha256('ANDRESXPOP1985');
+  console.log('[MasterKey] Initialized');
+})();
+
+// ===== i18n TRANSLATIONS =====
+const I18N = {
+  es: {
+    search_placeholder: 'Buscar lugar, autobús, dirección...',
+    cat_all: 'Todo', cat_restaurant: 'Restaurantes', cat_bus: 'Autobuses',
+    cat_hospital: 'Hospitales', cat_parcel: 'Paquetería', cat_delivery: 'Delivery',
+    nav_map: 'Mapa', nav_fav: 'Favoritos', nav_notes: 'Notas',
+    fav_title: 'Favoritos', fav_empty: 'No hay favoritos aún. Toca ⭐ en un lugar para guardarlo.',
+    settings_title: 'Ajustes', set_theme: 'Tema', set_lang: 'Idioma',
+    set_sound: 'Sonido', set_sound_enable: 'Sonidos de botones',
+    set_ai: 'APIs de IA', set_ai_model: 'Modelo preferido', save: 'Guardar',
+    set_data: 'Datos', set_dl_data: 'Descargar nuevos datos con IA',
+    set_export: 'Exportar datos', set_import: 'Importar datos',
+    set_folders: 'Carpetas', set_admin: 'Modo Admin',
+    set_custom_btn: 'Crear botones personalizados',
+    notes_title: 'Notas', guide_title: 'Manual y Guía',
+    choose_lang: 'Elegir idioma', offline: 'Modo sin conexión - Usando datos locales',
+    install_msg: 'Instala ¿A Donde? en tu dispositivo', install_btn: 'Instalar',
+    toast_fav_add: 'Añadido a favoritos', toast_fav_rm: 'Eliminado de favoritos',
+    toast_export: 'Datos exportados', toast_import: 'Datos importados correctamente',
+    toast_admin_ok: 'Modo Admin activado', toast_admin_fail: 'Contraseña incorrecta',
+    toast_saved: 'Guardado', toast_api_missing: 'Configura tu API Key en Ajustes',
+    toast_location_err: 'No se pudo obtener la ubicación',
+    toast_offline_data: 'Datos disponibles offline',
+    directions: 'Direcciones', favorite: 'Favorito', phone: 'Teléfono',
+    guide_content: `
+      <div class="guide-section"><h3>🗺️ Mapa y Navegación</h3><p>El mapa principal muestra tu ubicación y los lugares cercanos en Hong Kong. Usa el botón de ubicación (brújula) para centrar el mapa en tu posición actual. Puedes hacer zoom con los botones + / − o con gestos en pantalla táctil.</p></div>
+      <div class="guide-section"><h3>🔍 Búsqueda</h3><p>Escribe en la barra de búsqueda para encontrar lugares por nombre, dirección o tipo. Usa los chips de categoría para filtrar: Restaurantes, 7-Eleven, ParkShop, MTR, Autobuses KMB, Minibús, Taxis, Hospitales, Paquetería, Delivery y más.</p></div>
+      <div class="guide-section"><h3>🎤 Búsqueda por Voz</h3><p>Toca el botón del micrófono para buscar por voz. Si tienes configurada la API de Gemini, la IA procesará tu consulta para resultados más precisos.</p></div>
+      <div class="guide-section"><h3>⭐ Favoritos</h3><p>Marca cualquier lugar como favorito tocando ⭐ en su popup. Accede a todos tus favoritos desde el menú inferior.</p></div>
+      <div class="guide-section"><h3>🔗 Links Guardados</h3><p>Guarda enlaces compartidos desde el navegador u otras apps. Funciona como un sistema tipo Pocket para tener tus links organizados.</p></div>
+      <div class="guide-section"><h3>📝 Notas y Carpetas</h3><p>Crea notas y organízalas en carpetas personalizadas. Ideal para guardar direcciones, instrucciones o recordatorios.</p></div>
+      <div class="guide-section"><h3>🤖 IA Integrada</h3><p>Configura tus API Keys (Gemini, Groq) en Ajustes. La IA puede buscar nuevos datos, responder preguntas y añadir lugares a la base de datos.</p></div>
+      <div class="guide-section"><h3>📦 Datos Offline</h3><p>La app descarga datos de Hong Kong para uso sin conexión. Puedes descargar datos adicionales con IA y exportar/importar tu base de datos.</p></div>
+      <div class="guide-section"><h3>🔒 Modo Admin</h3><p>El modo admin desbloquea el Chat IA y la creación de botones personalizados (función premium). Accede desde Ajustes > Modo Admin.</p></div>
+      <div class="guide-section"><h3>🎨 Personalización</h3><p>3 temas disponibles: Claro, Oscuro y Neón. Cambia de idioma entre Español, English, 廣東話 y 中文.</p></div>
+      <div class="guide-section"><h3>📲 Instalar como App</h3><p>Toca el banner de instalación o usa el menú del navegador para añadir ¿A Donde? a tu pantalla de inicio.</p></div>
+    `
+  },
+  en: {
+    search_placeholder: 'Search place, bus, address...',
+    cat_all: 'All', cat_restaurant: 'Restaurants', cat_bus: 'Buses',
+    cat_hospital: 'Hospitals', cat_parcel: 'Parcel Shops', cat_delivery: 'Delivery',
+    nav_map: 'Map', nav_fav: 'Favorites', nav_notes: 'Notes',
+    fav_title: 'Favorites', fav_empty: 'No favorites yet. Tap ⭐ on a place to save it.',
+    settings_title: 'Settings', set_theme: 'Theme', set_lang: 'Language',
+    set_sound: 'Sound', set_sound_enable: 'Button sounds',
+    set_ai: 'AI APIs', set_ai_model: 'Preferred model', save: 'Save',
+    set_data: 'Data', set_dl_data: 'Download new data with AI',
+    set_export: 'Export data', set_import: 'Import data',
+    set_folders: 'Folders', set_admin: 'Admin Mode',
+    set_custom_btn: 'Create custom buttons',
+    notes_title: 'Notes', guide_title: 'Manual & Guide',
+    choose_lang: 'Choose language', offline: 'Offline mode - Using local data',
+    install_msg: 'Install ¿A Donde? on your device', install_btn: 'Install',
+    toast_fav_add: 'Added to favorites', toast_fav_rm: 'Removed from favorites',
+    toast_export: 'Data exported', toast_import: 'Data imported successfully',
+    toast_admin_ok: 'Admin mode activated', toast_admin_fail: 'Incorrect password',
+    toast_saved: 'Saved', toast_api_missing: 'Configure your API Key in Settings',
+    toast_location_err: 'Could not get location',
+    toast_offline_data: 'Data available offline',
+    directions: 'Directions', favorite: 'Favorite', phone: 'Phone',
+    guide_content: `
+      <div class="guide-section"><h3>🗺️ Map & Navigation</h3><p>The main map shows your location and nearby places in Hong Kong. Use the location button (crosshair) to center the map on your current position. Zoom with + / − buttons or touch gestures.</p></div>
+      <div class="guide-section"><h3>🔍 Search</h3><p>Type in the search bar to find places by name, address or type. Use category chips to filter: Restaurants, 7-Eleven, ParkShop, MTR, KMB Buses, Minibus, Taxis, Hospitals, Parcel Shops, Delivery and more.</p></div>
+      <div class="guide-section"><h3>🎤 Voice Search</h3><p>Tap the microphone button to search by voice. If Gemini API is configured, AI will process your query for more accurate results.</p></div>
+      <div class="guide-section"><h3>⭐ Favorites</h3><p>Star any place by tapping ⭐ in its popup. Access all favorites from the bottom menu.</p></div>
+      <div class="guide-section"><h3>🔗 Saved Links</h3><p>Save links shared from the browser or other apps. Works like a Pocket-style system.</p></div>
+      <div class="guide-section"><h3>📝 Notes & Folders</h3><p>Create notes and organize them in custom folders.</p></div>
+      <div class="guide-section"><h3>🤖 AI Integration</h3><p>Configure API Keys (Gemini, Groq) in Settings. AI can search for new data, answer questions and add places to the database.</p></div>
+      <div class="guide-section"><h3>📦 Offline Data</h3><p>The app downloads Hong Kong data for offline use. Download additional data with AI and export/import your database.</p></div>
+      <div class="guide-section"><h3>🔒 Admin Mode</h3><p>Admin mode unlocks AI Chat and custom button creation (premium feature).</p></div>
+      <div class="guide-section"><h3>🎨 Customization</h3><p>3 themes: Light, Dark, Neon. Languages: Spanish, English, Cantonese, Chinese.</p></div>
+      <div class="guide-section"><h3>📲 Install as App</h3><p>Tap the install banner or use the browser menu to add ¿A Donde? to your home screen.</p></div>
+    `
+  },
+  'zh-HK': {
+    search_placeholder: '搜尋地點、巴士、地址...',
+    cat_all: '全部', cat_restaurant: '餐廳', cat_bus: '巴士',
+    cat_hospital: '醫院', cat_parcel: '快遞站', cat_delivery: '外賣',
+    nav_map: '地圖', nav_fav: '收藏', nav_notes: '筆記',
+    fav_title: '收藏', fav_empty: '暫無收藏。點擊 ⭐ 收藏地點。',
+    settings_title: '設定', set_theme: '主題', set_lang: '語言',
+    set_sound: '聲音', set_sound_enable: '按鈕聲音',
+    set_ai: 'AI API', set_ai_model: '首選模型', save: '儲存',
+    set_data: '數據', set_dl_data: '用AI下載新數據',
+    set_export: '匯出數據', set_import: '匯入數據',
+    set_folders: '資料夾', set_admin: '管理員模式',
+    set_custom_btn: '建立自訂按鈕',
+    notes_title: '筆記', guide_title: '使用手冊',
+    choose_lang: '選擇語言', offline: '離線模式 - 使用本地數據',
+    install_msg: '安裝 ¿A Donde? 到你嘅裝置', install_btn: '安裝',
+    toast_fav_add: '已收藏', toast_fav_rm: '已取消收藏',
+    toast_export: '已匯出', toast_import: '數據匯入成功',
+    toast_admin_ok: '管理員模式已啟用', toast_admin_fail: '密碼錯誤',
+    toast_saved: '已儲存', toast_api_missing: '請喺設定配置API Key',
+    toast_location_err: '無法獲取位置',
+    toast_offline_data: '數據可離線使用',
+    directions: '路線', favorite: '收藏', phone: '電話',
+    guide_content: `
+      <div class="guide-section"><h3>🗺️ 地圖同導航</h3><p>主地圖顯示你嘅位置同附近嘅香港地點。使用定位按鈕（準星）將地圖居中到你嘅當前位置。用 + / − 按鈕或手勢縮放。用兩隻手指旋轉地圖。</p></div>
+      <div class="guide-section"><h3>🔍 搜尋</h3><p>喺搜尋欄輸入搵地點、地址或類型。用分類篩選：餐廳、7-Eleven、ParkShop、港鐵、KMB巴士、小巴、的士、醫院、快遞、外賣等。</p></div>
+      <div class="guide-section"><h3>🧭 Go / 去 導航</h3><p>點擊地點後選擇出行方式：步行（內置導航）、港鐵、巴士、小巴、的士、私家車或單車。步行模式提供逐步指示，包括「左轉」、「右轉」等語音提示。</p></div>
+      <div class="guide-section"><h3>🔊 語音TTS指示</h3><p>喺設定中啟用TTS語音。導航時會用選擇的語言報告方向。到達目的地時會以英語、西班牙語、廣東話同普通話通知你。</p></div>
+      <div class="guide-section"><h3>🎤 語音搜尋</h3><p>撳麥克風按鈕用語音搜尋。如果配置咗Gemini API，AI會處理你嘅查詢以獲得更準確的結果。</p></div>
+      <div class="guide-section"><h3>⭐ 收藏</h3><p>撳地點彈窗中嘅 ⭐ 收藏任何地點。從底部選單訪問所有收藏。</p></div>
+      <div class="guide-section"><h3>🔗 已儲存連結</h3><p>儲存從瀏覽器或其他應用程式分享嘅連結。類似Pocket風格的系統，用於整理你嘅連結。</p></div>
+      <div class="guide-section"><h3>📝 筆記同資料夾</h3><p>建立筆記並整理到自訂資料夾中。適合儲存地址、說明或提醒事項。</p></div>
+      <div class="guide-section"><h3>🤖 AI整合</h3><p>喺設定中配置API Keys（Gemini、Groq）。AI可以搜尋新數據、回答問題並將地點添加到數據庫。支援Gemini 2.5 Pro同最新Groq模型。</p></div>
+      <div class="guide-section"><h3>📡 附近掃描</h3><p>啟用持續掃描以自動檢測你附近嘅新地點。需要Gemini API Key。可在設定中啟用/停用掃描歷史記錄。</p></div>
+      <div class="guide-section"><h3>📦 離線數據</h3><p>應用程式下載香港數據以供離線使用。可以用AI下載更多數據並匯出/匯入你嘅數據庫。</p></div>
+      <div class="guide-section"><h3>🔒 管理員模式</h3><p>管理員模式解鎖AI聊天同自訂按鈕建立（高級功能）。通過上傳master_key.json文件或輸入主密碼訪問。</p></div>
+      <div class="guide-section"><h3>🚆 MTR活動同優惠</h3><p>撳港鐵站的「事件IA」按鈕，用AI搜尋附近嘅活動、優惠同折扣。</p></div>
+      <div class="guide-section"><h3>🎨 個人化</h3><p>3個主題：淺色、深色、霓虹。語言：西班牙語、英語、廣東話、普通話。</p></div>
+      <div class="guide-section"><h3>📲 安裝為應用程式</h3><p>撳安裝橫幅或使用瀏覽器選單將 ¿A Donde? 添加到你嘅主屏幕。</p></div>
+    `
+  },
+  'zh-CN': {
+    search_placeholder: '搜索地点、公交、地址...',
+    cat_all: '全部', cat_restaurant: '餐厅', cat_bus: '公交',
+    cat_hospital: '医院', cat_parcel: '快递站', cat_delivery: '外卖',
+    nav_map: '地图', nav_fav: '收藏', nav_notes: '笔记',
+    fav_title: '收藏', fav_empty: '暂无收藏。点击 ⭐ 收藏地点。',
+    settings_title: '设置', set_theme: '主题', set_lang: '语言',
+    set_sound: '声音', set_sound_enable: '按钮声音',
+    set_ai: 'AI API', set_ai_model: '首选模型', save: '保存',
+    set_data: '数据', set_dl_data: '用AI下载新数据',
+    set_export: '导出数据', set_import: '导入数据',
+    set_folders: '文件夹', set_admin: '管理员模式',
+    set_custom_btn: '创建自定义按钮',
+    notes_title: '笔记', guide_title: '使用手册',
+    choose_lang: '选择语言', offline: '离线模式 - 使用本地数据',
+    install_msg: '安装 ¿A Donde? 到你的设备', install_btn: '安装',
+    toast_fav_add: '已收藏', toast_fav_rm: '已取消收藏',
+    toast_export: '已导出', toast_import: '数据导入成功',
+    toast_admin_ok: '管理员模式已启用', toast_admin_fail: '密码错误',
+    toast_saved: '已保存', toast_api_missing: '请在设置中配置API Key',
+    toast_location_err: '无法获取位置',
+    toast_offline_data: '数据可离线使用',
+    directions: '路线', favorite: '收藏', phone: '电话',
+    guide_content: `
+      <div class="guide-section"><h3>🗺️ 地图与导航</h3><p>主地图显示你的位置和附近的香港地点。使用定位按钮（准星）将地图居中到你的当前位置。用 + / − 按钮或手势缩放。用两根手指旋转地图。</p></div>
+      <div class="guide-section"><h3>🔍 搜索</h3><p>在搜索栏输入查找地点、地址或类型。使用分类筛选：餐厅、7-Eleven、ParkShop、港铁、KMB公交、小巴、出租车、医院、快递、外卖等。</p></div>
+      <div class="guide-section"><h3>🧭 Go / 去 导航</h3><p>点击地点后选择出行方式：步行（内置导航）、港铁、公交、小巴、出租车、私家车或自行车。步行模式提供逐步指示，包括「左转」、「右转」等语音提示。</p></div>
+      <div class="guide-section"><h3>🔊 语音TTS指示</h3><p>在设置中启用TTS语音。导航时会用选择的语言报告方向。到达目的地时会以英语、西班牙语、粤语和普通话通知你。</p></div>
+      <div class="guide-section"><h3>🎤 语音搜索</h3><p>点击麦克风按钮用语音搜索。如果配置了Gemini API，AI会处理你的查询以获得更准确的结果。</p></div>
+      <div class="guide-section"><h3>⭐ 收藏</h3><p>点击地点弹窗中的 ⭐ 收藏任何地点。从底部菜单访问所有收藏。</p></div>
+      <div class="guide-section"><h3>🔗 已保存链接</h3><p>保存从浏览器或其他应用程序分享的链接。类似Pocket风格的系统，用于整理你的链接。</p></div>
+      <div class="guide-section"><h3>📝 笔记和文件夹</h3><p>创建笔记并整理到自定义文件夹中。适合保存地址、说明或提醒事项。</p></div>
+      <div class="guide-section"><h3>🤖 AI集成</h3><p>在设置中配置API Keys（Gemini、Groq）。AI可以搜索新数据、回答问题并将地点添加到数据库。支持Gemini 2.5 Pro和最新Groq模型。</p></div>
+      <div class="guide-section"><h3>📡 附近扫描</h3><p>启用持续扫描以自动检测你附近的新地点。需要Gemini API Key。可在设置中启用/停用扫描历史记录。</p></div>
+      <div class="guide-section"><h3>📦 离线数据</h3><p>应用程序下载香港数据以供离线使用。可以用AI下载更多数据并导出/导入你的数据库。</p></div>
+      <div class="guide-section"><h3>🔒 管理员模式</h3><p>管理员模式解锁AI聊天和自定义按钮创建（高级功能）。通过上传master_key.json文件或输入主密码访问。</p></div>
+      <div class="guide-section"><h3>🚆 港铁活动和优惠</h3><p>点击港铁站的「事件IA」按钮，用AI搜索附近的活动、优惠和折扣。</p></div>
+      <div class="guide-section"><h3>🎨 个性化</h3><p>3个主题：浅色、深色、霓虹。语言：西班牙语、英语、粤语、普通话。</p></div>
+      <div class="guide-section"><h3>📲 安装为应用程序</h3><p>点击安装横幅或使用浏览器菜单将 ¿A Donde? 添加到你的主屏幕。</p></div>
+    `
+  }
+};
+
+function t(key) { return (I18N[APP.lang] && I18N[APP.lang][key]) || (I18N.es[key]) || key; }
+
+function updateI18N() {
+  document.querySelectorAll('[data-i18n]').forEach(el => {
+    const k = el.getAttribute('data-i18n');
+    if (I18N[APP.lang] && I18N[APP.lang][k]) el.textContent = I18N[APP.lang][k];
+  });
+  document.querySelectorAll('[data-i18n-placeholder]').forEach(el => {
+    const k = el.getAttribute('data-i18n-placeholder');
+    if (I18N[APP.lang] && I18N[APP.lang][k]) el.placeholder = I18N[APP.lang][k];
+  });
+}
+
+// ===== SOUND ENGINE =====
+let audioCtx;
+function playClick() {
+  if (!APP.soundEnabled) return;
+  try {
+    if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    const osc = audioCtx.createOscillator();
+    const gain = audioCtx.createGain();
+    osc.connect(gain);
+    gain.connect(audioCtx.destination);
+    osc.frequency.value = 800;
+    osc.type = 'sine';
+    gain.gain.setValueAtTime(0.15, audioCtx.currentTime);
+    gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.1);
+    osc.start(audioCtx.currentTime);
+    osc.stop(audioCtx.currentTime + 0.1);
+  } catch(e) {}
+}
+
+// Add click sound to interactive elements
+document.addEventListener('click', (e) => {
+  if (e.target.closest('button, .cat-chip, .fm-btn, .form-btn, .hdr-btn, .toggle, .tab, .lang-btn, .theme-opt')) {
+    playClick();
+  }
+});
+
+// ===== HONG KONG DATABASE =====
+function getDefaultPlaces() { return [
+  // MTR Stations
+  {id:'mtr1',name:'Central Station 中環站',cat:'mtr',lat:22.2819,lng:114.1583,addr:'Central, Hong Kong Island',line:'Tsuen Wan / Island Line',icon:'fa-train',color:'#e60012'},
+  {id:'mtr2',name:'Admiralty Station 金鐘站',cat:'mtr',lat:22.2793,lng:114.1655,addr:'Admiralty, Hong Kong Island',line:'Multiple Lines',icon:'fa-train',color:'#e60012'},
+  {id:'mtr3',name:'Wan Chai Station 灣仔站',cat:'mtr',lat:22.2773,lng:114.1731,addr:'Wan Chai, Hong Kong Island',line:'Island Line',icon:'fa-train',color:'#007DC5'},
+  {id:'mtr4',name:'Causeway Bay Station 銅鑼灣站',cat:'mtr',lat:22.2801,lng:114.1840,addr:'Causeway Bay, Hong Kong Island',line:'Island Line',icon:'fa-train',color:'#007DC5'},
+  {id:'mtr5',name:'Tsim Sha Tsui Station 尖沙咀站',cat:'mtr',lat:22.2973,lng:114.1726,addr:'Tsim Sha Tsui, Kowloon',line:'Tsuen Wan Line',icon:'fa-train',color:'#e60012'},
+  {id:'mtr6',name:'Mong Kok Station 旺角站',cat:'mtr',lat:22.3193,lng:114.1694,addr:'Mong Kok, Kowloon',line:'Tsuen Wan / Kwun Tong Line',icon:'fa-train',color:'#e60012'},
+  {id:'mtr7',name:'Jordan Station 佐敦站',cat:'mtr',lat:22.3047,lng:114.1719,addr:'Jordan, Kowloon',line:'Tsuen Wan Line',icon:'fa-train',color:'#e60012'},
+  {id:'mtr8',name:'Yau Ma Tei Station 油麻地站',cat:'mtr',lat:22.3127,lng:114.1707,addr:'Yau Ma Tei, Kowloon',line:'Tsuen Wan / Kwun Tong Line',icon:'fa-train',color:'#e60012'},
+  {id:'mtr9',name:'Prince Edward Station 太子站',cat:'mtr',lat:22.3243,lng:114.1685,addr:'Prince Edward, Kowloon',line:'Tsuen Wan / Kwun Tong Line',icon:'fa-train',color:'#e60012'},
+  {id:'mtr10',name:'Sham Shui Po Station 深水埗站',cat:'mtr',lat:22.3309,lng:114.1623,addr:'Sham Shui Po, Kowloon',line:'Tsuen Wan Line',icon:'fa-train',color:'#e60012'},
+  {id:'mtr11',name:'Diamond Hill Station 鑽石山站',cat:'mtr',lat:22.3398,lng:114.2014,addr:'Diamond Hill, Kowloon',line:'Kwun Tong / Tuen Ma Line',icon:'fa-train',color:'#00A040'},
+  {id:'mtr12',name:'Wong Tai Sin Station 黃大仙站',cat:'mtr',lat:22.3419,lng:114.1935,addr:'Wong Tai Sin, Kowloon',line:'Kwun Tong Line',icon:'fa-train',color:'#00A040'},
+  {id:'mtr13',name:'Kwun Tong Station 觀塘站',cat:'mtr',lat:22.3123,lng:114.2264,addr:'Kwun Tong, Kowloon',line:'Kwun Tong Line',icon:'fa-train',color:'#00A040'},
+  {id:'mtr14',name:'Sha Tin Station 沙田站',cat:'mtr',lat:22.3826,lng:114.1875,addr:'Sha Tin, New Territories',line:'East Rail Line',icon:'fa-train',color:'#53B7E8'},
+  {id:'mtr15',name:'Tung Chung Station 東涌站',cat:'mtr',lat:22.2892,lng:113.9416,addr:'Tung Chung, Lantau',line:'Tung Chung Line',icon:'fa-train',color:'#F7943E'},
+  {id:'mtr16',name:'North Point Station 北角站',cat:'mtr',lat:22.2914,lng:114.2003,addr:'North Point, HK Island',line:'Island / Tseung Kwan O Line',icon:'fa-train',color:'#007DC5'},
+  {id:'mtr17',name:'Lai King Station 荔景站',cat:'mtr',lat:22.3483,lng:114.1264,addr:'Lai King, New Territories',line:'Tsuen Wan / Tung Chung Line',icon:'fa-train',color:'#e60012'},
+  {id:'mtr18',name:'Tsuen Wan Station 荃灣站',cat:'mtr',lat:22.3732,lng:114.1178,addr:'Tsuen Wan, New Territories',line:'Tsuen Wan Line',icon:'fa-train',color:'#e60012'},
+  {id:'mtr19',name:'Tuen Mun Station 屯門站',cat:'mtr',lat:22.3953,lng:113.9731,addr:'Tuen Mun, New Territories',line:'Tuen Ma Line',icon:'fa-train',color:'#9A3B26'},
+  {id:'mtr20',name:'Yuen Long Station 元朗站',cat:'mtr',lat:22.4461,lng:114.0354,addr:'Yuen Long, New Territories',line:'Tuen Ma Line',icon:'fa-train',color:'#9A3B26'},
+  {id:'mtr21',name:'Mei Foo Station 美孚站',cat:'mtr',lat:22.3385,lng:114.1370,addr:'Mei Foo, Kowloon',line:'Tsuen Wan / Tuen Ma Line',icon:'fa-train',color:'#e60012'},
+  {id:'mtr22',name:'Kowloon Station 九龍站',cat:'mtr',lat:22.3048,lng:114.1615,addr:'West Kowloon',line:'Tung Chung / Airport Express',icon:'fa-train',color:'#F7943E'},
+  {id:'mtr23',name:'Hong Kong Station 香港站',cat:'mtr',lat:22.2849,lng:114.1586,addr:'Central, HK Island',line:'Tung Chung / Airport Express',icon:'fa-train',color:'#F7943E'},
+  {id:'mtr24',name:'Tseung Kwan O Station 將軍澳站',cat:'mtr',lat:22.3073,lng:114.2606,addr:'Tseung Kwan O, NT',line:'Tseung Kwan O Line',icon:'fa-train',color:'#7E3F94'},
+
+  // 7-Eleven stores
+  {id:'711_1',name:'7-Eleven Mong Kok',cat:'7eleven',lat:22.3189,lng:114.1700,addr:'Nathan Rd, Mong Kok',icon:'fa-store',color:'#00875F',hours:'24h'},
+  {id:'711_2',name:'7-Eleven TST Star Ferry',cat:'7eleven',lat:22.2936,lng:114.1688,addr:'Salisbury Rd, TST',icon:'fa-store',color:'#00875F',hours:'24h'},
+  {id:'711_3',name:'7-Eleven Central',cat:'7eleven',lat:22.2815,lng:114.1560,addr:"Queen's Rd Central",icon:'fa-store',color:'#00875F',hours:'24h'},
+  {id:'711_4',name:'7-Eleven Wan Chai',cat:'7eleven',lat:22.2780,lng:114.1745,addr:'Hennessy Rd, Wan Chai',icon:'fa-store',color:'#00875F',hours:'24h'},
+  {id:'711_5',name:'7-Eleven Jordan',cat:'7eleven',lat:22.3050,lng:114.1725,addr:'Jordan Rd, Kowloon',icon:'fa-store',color:'#00875F',hours:'24h'},
+  {id:'711_6',name:'7-Eleven Sham Shui Po',cat:'7eleven',lat:22.3315,lng:114.1630,addr:'Cheung Sha Wan Rd, SSP',icon:'fa-store',color:'#00875F',hours:'24h'},
+  {id:'711_7',name:'7-Eleven Causeway Bay',cat:'7eleven',lat:22.2805,lng:114.1835,addr:'Yee Wo St, Causeway Bay',icon:'fa-store',color:'#00875F',hours:'24h'},
+
+  // ParkShop
+  {id:'ps1',name:'ParkShop Mong Kok',cat:'parkshop',lat:22.3210,lng:114.1688,addr:'Fa Yuen St, Mong Kok',icon:'fa-shopping-cart',color:'#E31837'},
+  {id:'ps2',name:'ParkShop Tsuen Wan',cat:'parkshop',lat:22.3720,lng:114.1195,addr:'Tsuen Wan Plaza',icon:'fa-shopping-cart',color:'#E31837'},
+  {id:'ps3',name:'ParkShop Sha Tin',cat:'parkshop',lat:22.3815,lng:114.1890,addr:'New Town Plaza, Sha Tin',icon:'fa-shopping-cart',color:'#E31837'},
+  {id:'ps4',name:'ParkShop Tseung Kwan O',cat:'parkshop',lat:22.3080,lng:114.2595,addr:'TKO Gateway, TKO',icon:'fa-shopping-cart',color:'#E31837'},
+
+  // Restaurants with delivery
+  {id:'r1',name:'Tim Ho Wan 添好運',cat:'restaurant',lat:22.3200,lng:114.1690,addr:'Mong Kok, Kowloon',icon:'fa-utensils',color:'#FF6B35',cuisine:'Dim Sum',delivery:true,phone:'+852-2332-2896'},
+  {id:'r2',name:'Kam Wah Cafe 金華冰廳',cat:'restaurant',lat:22.3245,lng:114.1680,addr:'Prince Edward, Kowloon',icon:'fa-utensils',color:'#FF6B35',cuisine:'Cha Chaan Teng',delivery:false},
+  {id:'r3',name:'Mak Noodle 麥奀雲吞麵世家',cat:'restaurant',lat:22.2825,lng:114.1565,addr:'Wellington St, Central',icon:'fa-utensils',color:'#FF6B35',cuisine:'Wonton Noodles',delivery:false},
+  {id:'r4',name:'Joy Hing Roast Meat 再興燒臘',cat:'restaurant',lat:22.2785,lng:114.1755,addr:'Wan Chai, HK Island',icon:'fa-utensils',color:'#FF6B35',cuisine:'Roast Meat',delivery:true,phone:'+852-2519-6639'},
+  {id:'r5',name:'Australia Dairy Company 澳洲牛奶公司',cat:'restaurant',lat:22.3130,lng:114.1715,addr:'Jordan, Kowloon',icon:'fa-utensils',color:'#FF6B35',cuisine:'Breakfast/Western',delivery:false},
+  {id:'r6',name:'Din Tai Fung 鼎泰豐',cat:'restaurant',lat:22.2810,lng:114.1840,addr:'Causeway Bay',icon:'fa-utensils',color:'#FF6B35',cuisine:'Shanghainese',delivery:true,phone:'+852-3160-8998',social:'@dintaifunghk'},
+  {id:'r7',name:'Crystal Jade 翡翠拉麵',cat:'restaurant',lat:22.2975,lng:114.1730,addr:'TST, Kowloon',icon:'fa-utensils',color:'#FF6B35',cuisine:'Shanghainese/Dim Sum',delivery:true,phone:'+852-2622-2699'},
+
+  // Hospitals
+  {id:'h1',name:'Queen Mary Hospital 瑪麗醫院',cat:'hospital',lat:22.2704,lng:114.1313,addr:'102 Pokfulam Rd',icon:'fa-hospital',color:'#DC3545',phone:'+852-2255-3838',emergency:true},
+  {id:'h2',name:'Queen Elizabeth Hospital 伊利沙伯醫院',cat:'hospital',lat:22.3085,lng:114.1741,addr:'30 Gascoigne Rd, Kowloon',icon:'fa-hospital',color:'#DC3545',phone:'+852-3506-8888',emergency:true},
+  {id:'h3',name:'Prince of Wales Hospital 威爾斯親王醫院',cat:'hospital',lat:22.3804,lng:114.2006,addr:'30-32 Ngan Shing St, Sha Tin',icon:'fa-hospital',color:'#DC3545',phone:'+852-3505-2211',emergency:true},
+  {id:'h4',name:'Tuen Mun Hospital 屯門醫院',cat:'hospital',lat:22.4066,lng:113.9768,addr:'23 Tsing Chung Koon Rd',icon:'fa-hospital',color:'#DC3545',phone:'+852-2468-5111',emergency:true},
+
+  // Bus stations (KMB)
+  {id:'b1',name:'KMB Star Ferry Bus Terminus 天星碼頭巴士總站',cat:'bus',lat:22.2938,lng:114.1690,addr:'TST Promenade',icon:'fa-bus',color:'#C4122F',routes:'1, 1A, 2, 6, 9'},
+  {id:'b2',name:'KMB Mong Kok 旺角',cat:'bus',lat:22.3196,lng:114.1705,addr:'Argyle St, Mong Kok',icon:'fa-bus',color:'#C4122F',routes:'2, 3C, 10, 27'},
+  {id:'b3',name:'KMB Cross Harbour Tunnel 紅隧',cat:'bus',lat:22.3018,lng:114.1797,addr:'Cross Harbour Tunnel',icon:'fa-bus',color:'#C4122F',routes:'101, 102, 103, 104, 111, 116, 170'},
+  {id:'b4',name:'KMB Sha Tin Central 沙田市中心',cat:'bus',lat:22.3830,lng:114.1888,addr:'Sha Tin Centre St',icon:'fa-bus',color:'#C4122F',routes:'80, 81, 85, 86, 87, 89'},
+  {id:'b5',name:'KMB Tuen Mun Town Centre 屯門市中心',cat:'bus',lat:22.3940,lng:113.9740,addr:'Tuen Mun',icon:'fa-bus',color:'#C4122F',routes:'52X, 53, 58M, 59M, 60M, 63X'},
+
+  // Minibus
+  {id:'mb1',name:'Minibus Mong Kok - Tsuen Wan',cat:'minibus',lat:22.3185,lng:114.1685,addr:'Sai Yee St, Mong Kok',icon:'fa-shuttle-van',color:'#FFB300',routes:'Green 39M'},
+  {id:'mb2',name:'Minibus Jordan - Stanley',cat:'minibus',lat:22.3045,lng:114.1710,addr:'Jordan Rd',icon:'fa-shuttle-van',color:'#FFB300',routes:'Red 6'},
+  {id:'mb3',name:'Minibus Central - Peak',cat:'minibus',lat:22.2822,lng:114.1555,addr:'Edinburgh Place, Central',icon:'fa-shuttle-van',color:'#FFB300',routes:'Green 1'},
+
+  // Taxi Stands
+  {id:'tx1',name:'Taxi Stand TST',cat:'taxi',lat:22.2967,lng:114.1723,addr:'Nathan Rd, TST',icon:'fa-taxi',color:'#FF0000'},
+  {id:'tx2',name:'Taxi Stand Central Pier',cat:'taxi',lat:22.2870,lng:114.1595,addr:'Man Yiu St, Central',icon:'fa-taxi',color:'#FF0000'},
+  {id:'tx3',name:'Taxi Stand Mong Kok',cat:'taxi',lat:22.3195,lng:114.1715,addr:'Argyle St, Mong Kok',icon:'fa-taxi',color:'#FF0000'},
+  {id:'tx4',name:'Taxi Stand Causeway Bay',cat:'taxi',lat:22.2798,lng:114.1825,addr:'Great George St, CWB',icon:'fa-taxi',color:'#FF0000'},
+
+  // Parcel shops
+  {id:'pc1',name:'SF Express 順豐速運 - TST',cat:'parcel',lat:22.2985,lng:114.1735,addr:'Granville Rd, TST',icon:'fa-box',color:'#D40000'},
+  {id:'pc2',name:'SF Express 順豐速運 - Mong Kok',cat:'parcel',lat:22.3190,lng:114.1680,addr:'Tung Choi St, MK',icon:'fa-box',color:'#D40000'},
+  {id:'pc3',name:'Alfred 智能櫃 - Central',cat:'parcel',lat:22.2830,lng:114.1575,addr:'Des Voeux Rd, Central',icon:'fa-box',color:'#FF6600'},
+  {id:'pc4',name:'HK Post 香港郵政 - Jordan',cat:'parcel',lat:22.3055,lng:114.1680,addr:'Nathan Rd, Jordan',icon:'fa-box',color:'#009E49'},
+
+  // Meaning stores
+  {id:'mg1',name:'Meaning 日本城 - Mong Kok',cat:'meaning',lat:22.3205,lng:114.1695,addr:'Sai Yeung Choi St, MK',icon:'fa-shopping-bag',color:'#0070C0'},
+  {id:'mg2',name:'Meaning 日本城 - Wan Chai',cat:'meaning',lat:22.2778,lng:114.1738,addr:'Queen\'s Rd East, Wan Chai',icon:'fa-shopping-bag',color:'#0070C0'},
+  {id:'mg3',name:'Meaning 日本城 - TST',cat:'meaning',lat:22.2980,lng:114.1720,addr:'Cameron Rd, TST',icon:'fa-shopping-bag',color:'#0070C0'},
+
+  // Delivery restaurants
+  {id:'dl1',name:'McDonald\'s Delivery 麥當勞',cat:'delivery',lat:22.3170,lng:114.1700,addr:'Multiple locations, MK',icon:'fa-motorcycle',color:'#FFC72C',delivery:true,phone:'+852-2175-8888',social:'mcdonalds.com.hk'},
+  {id:'dl2',name:'Pizza Hut Delivery 必勝客',cat:'delivery',lat:22.3120,lng:114.1720,addr:'Multiple locations',icon:'fa-motorcycle',color:'#EE3A23',delivery:true,phone:'+852-2894-8338',social:'pizzahut.com.hk'},
+  {id:'dl3',name:'KFC Delivery 肯德基',cat:'delivery',lat:22.2970,lng:114.1718,addr:'Multiple locations, TST',icon:'fa-motorcycle',color:'#F40027',delivery:true,phone:'+852-2261-2338'}
+];}
+
+// ===== INITIALIZE MAP =====
+let map;
+function initMap() {
+  map = L.map('map', {
+    center: [APP.userLat, APP.userLng],
+    zoom: 14,
+    zoomControl: false,
+    attributionControl: true,
+    preferCanvas: true,
+    rotate: true,
+    touchRotate: true
+  });
+  // Primary tiles: CartoDB Voyager — fast CDN, no Referer restriction, renders reliably
+  const tileLayer = L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', {
+    attribution: '© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> © <a href="https://carto.com/">CARTO</a>',
+    maxZoom: 20,
+    subdomains: ['a','b','c','d'],
+    crossOrigin: true,
+    keepBuffer: 6,
+    updateWhenIdle: false,
+    updateWhenZooming: false,
+    detectRetina: true
+  });
+  tileLayer.addTo(map);
+  currentTileLayer = tileLayer;
+  loadPlaces();
+  renderMarkers();
+  // Force re-render after splash hides (fixes grey map)
+  setTimeout(() => { map.invalidateSize(true); }, 200);
+  setTimeout(() => { map.invalidateSize(true); }, 1600);
+}
+
+// ===== CATEGORY ICONS =====
+function getCatIcon(cat, color) {
+  const iconMap = {
+    mtr: 'fa-train', '7eleven': 'fa-store', parkshop: 'fa-shopping-cart',
+    restaurant: 'fa-utensils', hospital: 'fa-hospital', bus: 'fa-bus',
+    minibus: 'fa-shuttle-van', taxi: 'fa-taxi', parcel: 'fa-box',
+    meaning: 'fa-shopping-bag', delivery: 'fa-motorcycle'
+  };
+  const ic = iconMap[cat] || 'fa-map-marker-alt';
+  const c = color || 'var(--accent)';
+  return L.divIcon({
+    html: `<div style="background:${c};width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;border:2px solid #fff;box-shadow:0 2px 8px rgba(0,0,0,0.4);"><i class="fas ${ic}" style="color:#fff;font-size:14px;"></i></div>`,
+    className: 'custom-marker',
+    iconSize: [32, 32],
+    iconAnchor: [16, 32],
+    popupAnchor: [0, -32]
+  });
+}
+
+// ===== GEOLOCATION =====
+function locateUser() {
+  playClick();
+  if (!navigator.geolocation) { showToast(t('toast_location_err'), 'error'); return; }
+  navigator.geolocation.getCurrentPosition(
+    (pos) => {
+      APP.userLat = pos.coords.latitude;
+      APP.userLng = pos.coords.longitude;
+      APP.hasLocation = true;
+      map.setView([APP.userLat, APP.userLng], 16);
+      if (APP.userMarker) map.removeLayer(APP.userMarker);
+      APP.userMarker = L.marker([APP.userLat, APP.userLng], {
+        icon: L.divIcon({
+          html: '<div style="width:20px;height:20px;background:var(--accent);border:3px solid #fff;border-radius:50%;box-shadow:0 0 15px var(--accent);animation:pulse 2s infinite;"></div>',
+          className: 'user-loc-marker',
+          iconSize: [20, 20],
+          iconAnchor: [10, 10]
+        })
+      }).addTo(map).bindPopup('<b>📍 Tu ubicación</b>');
+    },
+    (err) => { showToast(t('toast_location_err'), 'error'); },
+    { enableHighAccuracy: true, timeout: 10000, maximumAge: 60000 }
+  );
+}
+
+function resetMap() {
+  playClick();
+  map.setView([22.3193, 114.1694], 13);
+  filterCategory('all');
+}
+
+// ===== DIRECTIONS =====
+function getDirections(lat, lng) {
+  const url = `https://www.google.com/maps/dir/?api=1&destination=${lat},${lng}&travelmode=transit`;
+  window.open(url, '_blank');
+}
+
+// ===== SEARCH =====
+function filterPlaces(query) {
+  if (!query || query.length < 2) { renderMarkers(APP.currentCat); return; }
+  const q = query.toLowerCase();
+  APP.markers.forEach(m => map.removeLayer(m));
+  APP.markers = [];
+  const results = APP.places.filter(p => {
+    return p.name.toLowerCase().includes(q) ||
+           p.addr.toLowerCase().includes(q) ||
+           p.cat.toLowerCase().includes(q) ||
+           (p.routes && p.routes.toLowerCase().includes(q)) ||
+           (p.cuisine && p.cuisine.toLowerCase().includes(q)) ||
+           (p.line && p.line.toLowerCase().includes(q));
+  });
+  results.forEach(p => {
+    const marker = L.marker([p.lat, p.lng], { icon: getCatIcon(p.cat, p.color) })
+      .bindPopup(`<div class="popup-title">${p.name}</div><div class="popup-addr">${p.addr}</div>`)
+      .addTo(map);
+    APP.markers.push(marker);
+  });
+  if (results.length > 0) {
+    const group = L.featureGroup(APP.markers);
+    map.fitBounds(group.getBounds().pad(0.2));
+  }
+}
+
+function doSearch() {
+  const q = document.getElementById('searchInput').value;
+  filterPlaces(q);
+}
+
+// ===== VOICE SEARCH =====
+let recognition;
+let isRecording = false;
+
+function toggleVoice() {
+  if (isRecording) { stopVoice(); return; }
+  if (!('webkitSpeechRecognition' in window) && !('SpeechRecognition' in window)) {
+    showToast('Voice search not supported in this browser', 'error');
+    return;
+  }
+  const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+  recognition = new SR();
+  recognition.lang = APP.lang === 'zh-HK' ? 'zh-HK' : APP.lang === 'zh-CN' ? 'zh-CN' : APP.lang === 'en' ? 'en-US' : 'es-ES';
+  recognition.continuous = false;
+  recognition.interimResults = false;
+  recognition.onstart = () => {
+    isRecording = true;
+    document.getElementById('voiceBtn').classList.add('recording');
+  };
+  recognition.onresult = async (e) => {
+    const text = e.results[0][0].transcript;
+    document.getElementById('searchInput').value = text;
+    stopVoice();
+    if (APP.apiKeys.gemini) {
+      await aiEnhancedSearch(text);
+    } else {
+      filterPlaces(text);
+    }
+  };
+  recognition.onerror = () => { stopVoice(); };
+  recognition.onend = () => { stopVoice(); };
+  recognition.start();
+}
+
+function stopVoice() {
+  isRecording = false;
+  document.getElementById('voiceBtn').classList.remove('recording');
+  if (recognition) try { recognition.stop(); } catch(e) {}
+}
+
+// ===== AI ENHANCED SEARCH =====
+async function aiEnhancedSearch(query) {
+  if (!APP.apiKeys.gemini) { filterPlaces(query); return; }
+  try {
+    const geminiId = getGeminiModelId(APP.aiModel);
+    const resp = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${geminiId}:generateContent?key=${APP.apiKeys.gemini}`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        contents: [{ parts: [{ text: `The user is searching for places in Hong Kong. Query: "${query}". Return a JSON array of category keywords to search for. Categories: restaurant, 7eleven, parkshop, mtr, bus, minibus, taxi, hospital, parcel, delivery, meaning. Return ONLY a JSON array of strings like ["restaurant","mtr"]. If the query mentions a specific place name, also return it in a "search" field. Format: {"categories":[],"search":""}` }] }]
+      })
+    });
+    const data = await resp.json();
+    const text = data.candidates?.[0]?.content?.parts?.[0]?.text || '';
+    const jsonMatch = text.match(/\{[\s\S]*\}/);
+    if (jsonMatch) {
+      const parsed = JSON.parse(jsonMatch[0]);
+      if (parsed.search) {
+        document.getElementById('searchInput').value = parsed.search;
+        filterPlaces(parsed.search);
+      } else if (parsed.categories && parsed.categories.length > 0) {
+        filterCategory(parsed.categories[0]);
+      }
+    } else {
+      filterPlaces(query);
+    }
+  } catch (e) {
+    console.warn('AI search failed, falling back to local:', e);
+    filterPlaces(query);
+  }
+}
+
+// ===== FAVORITES =====
+function toggleFavorite(id) {
+  const idx = APP.favorites.indexOf(id);
+  if (idx > -1) {
+    APP.favorites.splice(idx, 1);
+    showToast(t('toast_fav_rm'), 'success');
+  } else {
+    APP.favorites.push(id);
+    showToast(t('toast_fav_add'), 'success');
+  }
+  saveState();
+  renderMarkers(APP.currentCat);
+  renderFavorites();
+  playClick();
+}
+
+function renderFavorites() {
+  const container = document.getElementById('favList');
+  if (APP.favorites.length === 0) {
+    container.innerHTML = `<p style="color:var(--text2);text-align:center;padding:40px 0">${t('fav_empty')}</p>`;
+    return;
+  }
+  container.innerHTML = APP.favorites.map(id => {
+    const p = APP.places.find(pl => pl.id === id);
+    if (!p) return '';
+    return `<div class="item-card" onclick="map.setView([${p.lat},${p.lng}],17);closePanel('favorites')">
+      <div class="ic-title"><i class="fas ${p.icon || 'fa-map-marker-alt'}" style="color:${p.color}"></i> ${p.name}</div>
+      <div class="ic-sub">${p.addr}</div>
+      <div class="ic-actions">
+        <button class="form-btn" style="padding:4px 10px;font-size:.75rem" onclick="event.stopPropagation();getDirections(${p.lat},${p.lng})"><i class="fas fa-directions"></i></button>
+        <button class="form-btn danger" style="padding:4px 10px;font-size:.75rem" onclick="event.stopPropagation();toggleFavorite('${p.id}')"><i class="fas fa-trash"></i></button>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+// ===== PANELS =====
+function togglePanel(name) {
+  const panel = document.getElementById('panel' + name.charAt(0).toUpperCase() + name.slice(1));
+  if (!panel) return;
+  const isOpen = panel.classList.contains('open');
+  document.querySelectorAll('.panel').forEach(p => p.classList.remove('open'));
+  if (!isOpen) {
+    panel.classList.add('open');
+    if (name === 'favorites') renderFavorites();
+    if (name === 'links') renderLinks();
+    if (name === 'notes') renderNotes();
+    if (name === 'guide') renderGuide();
+    if (name === 'settings') renderFolders();
+  }
+  playClick();
+}
+
+function closePanel(name) {
+  const panel = document.getElementById('panel' + name.charAt(0).toUpperCase() + name.slice(1));
+  if (panel) panel.classList.remove('open');
+}
+
+function switchView(view) {
+  document.querySelectorAll('.fm-btn').forEach(b => b.classList.remove('active'));
+  event.currentTarget.classList.add('active');
+  document.querySelectorAll('.panel').forEach(p => p.classList.remove('open'));
+  if (view === 'map') map.invalidateSize();
+  playClick();
+}
+
+// ===== MODALS =====
+function showAdminLogin() { document.getElementById('modalAdmin').classList.add('show'); }
+function showLangModal() { document.getElementById('modalLang').classList.add('show'); }
+function showCustomBtnCreator() { document.getElementById('modalCustomBtn').classList.add('show'); }
+function closeModal(id) { document.getElementById(id).classList.remove('show'); }
+
+// ===== ADMIN =====
+async function verifyAdmin() {
+  const pass = document.getElementById('adminPassInput').value;
+  const hash = await sha256(pass);
+  if (hash === MASTER_KEY.hash) {
+    APP.isAdmin = true;
+    document.getElementById('adminFeatures').style.display = 'block';
+    closeModal('modalAdmin');
+    showToast(t('toast_admin_ok'), 'success');
+  } else {
+    showToast(t('toast_admin_fail'), 'error');
+  }
+  document.getElementById('adminPassInput').value = '';
+}
+
+// ===== AI HELPERS =====
+function getGeminiModelId(modelVal) {
+  const map = {
+    // Gemini 3 series (current 2026)
+    'gemini-3.1-pro-preview': 'gemini-3.1-pro-preview',
+    'gemini-3-flash': 'gemini-3-flash',
+    'gemini-3.1-flash-lite': 'gemini-3.1-flash-lite',
+    // Gemini 2.5 series
+    'gemini-2.5-pro': 'gemini-2.5-pro',
+    'gemini-2.5-flash': 'gemini-2.5-flash',
+    'gemini-2.5-flash-lite': 'gemini-2.5-flash-lite',
+    // Legacy aliases
+    'gemini-2.0-flash': 'gemini-2.5-flash',
+    'gemini-2.0-flash-lite': 'gemini-2.5-flash-lite',
+    'gemini-1.5-pro': 'gemini-2.5-pro',
+    'gemini-1.5-flash': 'gemini-2.5-flash',
+    'gemini': 'gemini-3.1-pro-preview'
+  };
+  return map[modelVal] || 'gemini-3.1-pro-preview';
+}
+function getGroqModelId(modelVal) {
+  const map = {
+    'groq-llama4-scout': 'meta-llama/llama-4-scout-17b-16e-instruct',
+    'groq-llama4-maverick': 'meta-llama/llama-4-maverick-17b-128e-instruct',
+    'groq-llama3-70b': 'llama3-70b-8192',
+    'groq-deepseek-r1': 'deepseek-r1-distill-llama-70b',
+    'groq-mixtral': 'mixtral-8x7b-32768',
+    'groq-llama': 'llama3-70b-8192',  // legacy
+  };
+  return map[modelVal] || 'llama3-70b-8192';
+}
+function isGeminiModel(modelVal) { return modelVal.startsWith('gemini') || modelVal === 'gemini'; }
+function isGroqModel(modelVal) { return modelVal.startsWith('groq'); }
+
+function switchAdminTab(tab) {
+  document.getElementById('adminSectionPass').style.display = tab === 'pass' ? 'block' : 'none';
+  document.getElementById('adminSectionJson').style.display = tab === 'json' ? 'block' : 'none';
+  document.getElementById('adminTabPass').classList.toggle('active', tab === 'pass');
+  document.getElementById('adminTabJson').classList.toggle('active', tab === 'json');
+}
+
+async function verifyAdminJSON(event) {
+  const file = event.target.files[0];
+  if (!file) return;
+  const status = document.getElementById('adminJsonStatus');
+  try {
+    const text = await file.text();
+    const json = JSON.parse(text);
+    if (!json.password_hash || json.hash_algorithm !== 'SHA-256') {
+      status.innerHTML = '<span style="color:#ff6666">❌ Archivo JSON inválido o sin hash SHA-256</span>';
+      return;
+    }
+    if (json.password_hash === MASTER_KEY.hash) {
+      APP.isAdmin = true;
+      document.getElementById('adminFeatures').style.display = 'block';
+      closeModal('modalAdmin');
+      showToast(t('toast_admin_ok'), 'success');
+    } else {
+      status.innerHTML = '<span style="color:#ff6666">❌ Hash incorrecto — archivo de llave inválido</span>';
+    }
+  } catch(e) {
+    status.innerHTML = '<span style="color:#ff6666">❌ Error al leer el archivo: ' + escHTML(e.message) + '</span>';
+  }
+  event.target.value = '';
+}
+
+
+async function sendAIMessage() {
+  if (!APP.isAdmin) { showToast('Admin mode required', 'error'); return; }
+  const input = document.getElementById('aiInput');
+  const msg = input.value.trim();
+  if (!msg) return;
+  const container = document.getElementById('aiMessages');
+  container.innerHTML += `<div class="ai-msg user">${escHTML(msg)}</div>`;
+  input.value = '';
+  container.scrollTop = container.scrollHeight;
+
+  const model = document.getElementById('aiModel').value;
+  try {
+    let reply = '';
+    if (isGeminiModel(model) && APP.apiKeys.gemini) {
+      const geminiId = getGeminiModelId(model);
+      const resp = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${geminiId}:generateContent?key=${APP.apiKeys.gemini}`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          contents: [{ parts: [{ text: `You are the AI assistant for "¿A Donde?" a Hong Kong location app. Help with finding places, adding data, and app configuration. User language: ${APP.lang}. User message: ${msg}` }] }]
+        })
+      });
+      const data = await resp.json();
+      reply = data.candidates?.[0]?.content?.parts?.[0]?.text || 'No response from Gemini.';
+    } else if (isGroqModel(model) && APP.apiKeys.groq) {
+      const groqId = getGroqModelId(model);
+      const resp = await fetch('https://api.groq.com/openai/v1/chat/completions', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${APP.apiKeys.groq}` },
+        body: JSON.stringify({
+          model: groqId,
+          messages: [
+            { role: 'system', content: `You are the AI assistant for "¿A Donde?", a Hong Kong location app. Respond in ${APP.lang}.` },
+            { role: 'user', content: msg }
+          ],
+          max_tokens: 1024
+        })
+      });
+      const data = await resp.json();
+      reply = data.choices?.[0]?.message?.content || 'No response from Groq.';
+    } else {
+      reply = t('toast_api_missing');
+    }
+    container.innerHTML += `<div class="ai-msg bot">${escHTML(reply)}</div>`;
+    // Check if AI returned place data to add
+    tryParseAIPlaces(reply);
+  } catch (e) {
+    container.innerHTML += `<div class="ai-msg bot" style="color:#ff6666">Error: ${escHTML(e.message)}</div>`;
+  }
+  container.scrollTop = container.scrollHeight;
+}
+
+function tryParseAIPlaces(text) {
+  try {
+    const jsonMatch = text.match(/\[[\s\S]*\]/);
+    if (jsonMatch) {
+      const places = JSON.parse(jsonMatch[0]);
+      if (Array.isArray(places) && places[0] && places[0].lat) {
+        places.forEach(p => {
+          if (!APP.places.find(ep => ep.id === p.id)) {
+            APP.places.push({ ...p, id: p.id || 'ai_' + Date.now() + Math.random() });
+          }
+        });
+        saveState();
+        renderMarkers(APP.currentCat);
+        showToast(`${places.length} places added from AI`, 'success');
+      }
+    }
+  } catch(e) {}
+}
+
+// ===== AI DATA DOWNLOAD =====
+function downloadAIData() {
+  document.getElementById('modalAIData').classList.add('show');
+}
+
+async function fetchAIData() {
+  const query = document.getElementById('aiDataQuery').value;
+  const area = document.getElementById('aiDataArea').value;
+  const status = document.getElementById('aiDataStatus');
+
+  if (!query) { showToast('Enter a category to search', 'error'); return; }
+  if (!APP.apiKeys.gemini && !APP.apiKeys.groq) { showToast(t('toast_api_missing'), 'error'); return; }
+
+  status.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Buscando datos con IA...';
+
+  const prompt = `Generate a JSON array of 5-8 real places in Hong Kong ${area !== 'all' ? 'in ' + area : ''} for category: "${query}". Each object must have: id (unique string), name (English + Chinese if possible), cat (category string), lat (number), lng (number), addr (street address), icon (font-awesome class like "fa-store"), color (hex color). Return ONLY the JSON array, no other text.`;
+
+  try {
+    let reply = '';
+    if (APP.apiKeys.gemini) {
+      const geminiId = getGeminiModelId(APP.aiModel);
+      const resp = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${geminiId}:generateContent?key=${APP.apiKeys.gemini}`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }] })
+      });
+      const data = await resp.json();
+      reply = data.candidates?.[0]?.content?.parts?.[0]?.text || '';
+    } else if (APP.apiKeys.groq) {
+      const groqId = getGroqModelId(APP.aiModel);
+      const resp = await fetch('https://api.groq.com/openai/v1/chat/completions', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${APP.apiKeys.groq}` },
+        body: JSON.stringify({ model: groqId, messages: [{ role: 'user', content: prompt }], max_tokens: 2048 })
+      });
+      const data = await resp.json();
+      reply = data.choices?.[0]?.message?.content || '';
+    }
+
+    const jsonMatch = reply.match(/\[[\s\S]*\]/);
+    if (jsonMatch) {
+      const places = JSON.parse(jsonMatch[0]);
+      let added = 0;
+      places.forEach(p => {
+        if (p.lat && p.lng && !APP.places.find(ep => ep.name === p.name)) {
+          APP.places.push({ ...p, id: p.id || 'ai_' + Date.now() + '_' + (added++) });
+          added++;
+        }
+      });
+      saveState();
+      renderMarkers(APP.currentCat);
+      status.innerHTML = `<span style="color:#44ffaa">✅ ${added} nuevos lugares añadidos a la base de datos</span>`;
+      showToast(t('toast_offline_data'), 'success');
+    } else {
+      status.innerHTML = '<span style="color:#ff6666">No se pudieron procesar los datos</span>';
+    }
+  } catch (e) {
+    status.innerHTML = `<span style="color:#ff6666">Error: ${e.message}</span>`;
+  }
+}
+
+// ===== LINKS (Pocket style) =====
+function saveLink() {
+  const url = document.getElementById('newLinkUrl').value.trim();
+  if (!url) return;
+  APP.links.unshift({ id: Date.now(), url, title: url, date: new Date().toLocaleDateString(), folder: '' });
+  document.getElementById('newLinkUrl').value = '';
+  saveState();
+  renderLinks();
+  showToast(t('toast_saved'), 'success');
+}
+
+function renderLinks() {
+  const c = document.getElementById('linksList');
+  if (APP.links.length === 0) { c.innerHTML = '<p style="color:var(--text2);text-align:center">No saved links.</p>'; return; }
+  c.innerHTML = APP.links.map((l, i) => `
+    <div class="item-card">
+      <div class="ic-title"><i class="fas fa-link"></i> <a href="${escHTML(l.url)}" target="_blank" style="color:var(--accent)">${escHTML(l.title || l.url)}</a></div>
+      <div class="ic-sub">${l.date}</div>
+      <div class="ic-actions">
+        <button class="form-btn danger" style="padding:4px 10px;font-size:.75rem" onclick="APP.links.splice(${i},1);saveState();renderLinks()"><i class="fas fa-trash"></i></button>
+      </div>
+    </div>
+  `).join('');
+}
+
+// ===== NOTES & FOLDERS =====
+function createFolder() {
+  const name = document.getElementById('newFolderName').value.trim();
+  if (!name) return;
+  APP.folders.push({ id: Date.now(), name });
+  document.getElementById('newFolderName').value = '';
+  saveState();
+  renderFolders();
+  updateFolderSelects();
+  showToast(t('toast_saved'), 'success');
+}
+
+function renderFolders() {
+  const c = document.getElementById('foldersList');
+  if (!c) return;
+  c.innerHTML = APP.folders.map((f, i) => `
+    <div class="item-card" style="padding:8px 12px;display:flex;align-items:center;justify-content:space-between">
+      <span><i class="fas fa-folder" style="color:var(--accent3)"></i> ${escHTML(f.name)}</span>
+      <button class="form-btn danger" style="padding:2px 8px;font-size:.72rem" onclick="APP.folders.splice(${i},1);saveState();renderFolders();updateFolderSelects()"><i class="fas fa-trash"></i></button>
+    </div>
+  `).join('');
+}
+
+function updateFolderSelects() {
+  const sel = document.getElementById('noteFolderSelect');
+  if (!sel) return;
+  sel.innerHTML = '<option value="">Sin carpeta</option>' + APP.folders.map(f => `<option value="${f.id}">${escHTML(f.name)}</option>`).join('');
+}
+
+function createNote() {
+  const folder = document.getElementById('noteFolderSelect').value;
+  APP.notes.unshift({ id: Date.now(), text: '', folder, date: new Date().toLocaleDateString() });
+  saveState();
+  renderNotes();
+}
+
+function renderNotes() {
+  const c = document.getElementById('notesList');
+  if (APP.notes.length === 0) { c.innerHTML = '<p style="color:var(--text2);text-align:center">No notes yet.</p>'; return; }
+  c.innerHTML = APP.notes.map((n, i) => {
+    const folderObj = APP.folders.find(f => String(f.id) === String(n.folder));
+    return `<div class="note-card">
+      ${folderObj ? `<span class="folder-tag"><i class="fas fa-folder"></i> ${escHTML(folderObj.name)}</span>` : ''}
+      <span style="font-size:.7rem;color:var(--text2)">${n.date}</span>
+      <textarea placeholder="Escribe tu nota..." onchange="APP.notes[${i}].text=this.value;saveState()">${escHTML(n.text)}</textarea>
+      <button class="form-btn danger" style="padding:2px 8px;font-size:.72rem;margin-top:4px" onclick="APP.notes.splice(${i},1);saveState();renderNotes()"><i class="fas fa-trash"></i> Eliminar</button>
+    </div>`;
+  }).join('');
+}
+
+// ===== CUSTOM BUTTONS (Admin/Premium) =====
+function createCustomButton() {
+  if (!APP.isAdmin) { showToast('Admin mode required', 'error'); return; }
+  const name = document.getElementById('cbName').value.trim();
+  const url = document.getElementById('cbUrl').value.trim();
+  const color = document.getElementById('cbColor').value;
+  const shape = document.getElementById('cbShape').value;
+  if (!name || !url) return;
+  APP.customButtons.push({ id: Date.now(), name, url, color, shape });
+  saveState();
+  closeModal('modalCustomBtn');
+  renderCustomButtons();
+  showToast(t('toast_saved'), 'success');
+}
+
+function renderCustomButtons() {
+  const existing = document.getElementById('customBtnsArea');
+  if (existing) existing.remove();
+  if (APP.customButtons.length === 0) return;
+  const div = document.createElement('div');
+  div.id = 'customBtnsArea';
+  div.style.cssText = 'padding:8px 12px;display:flex;gap:8px;overflow-x:auto;flex-wrap:wrap;';
+  APP.customButtons.forEach(b => {
+    const shapes = { rounded: '12px', circle: '50%', square: '4px', pill: '25px' };
+    const btn = document.createElement('a');
+    btn.href = b.url;
+    btn.target = '_blank';
+    btn.style.cssText = `background:${b.color};color:#fff;padding:8px 16px;border-radius:${shapes[b.shape] || '12px'};font-size:.82rem;text-decoration:none;white-space:nowrap;display:inline-block;`;
+    btn.textContent = b.name;
+    div.appendChild(btn);
+  });
+  document.getElementById('catsBar').after(div);
+}
+
+// ===== GUIDE =====
+function renderGuide() {
+  document.getElementById('guideContent').innerHTML = t('guide_content');
+}
+
+// ===== THEME =====
+function setTheme(theme) {
+  APP.theme = theme;
+  document.body.setAttribute('data-theme', theme);
+  document.querySelectorAll('.theme-opt').forEach(o => o.classList.toggle('active', o.dataset.thopt === theme));
+  saveState();
+}
+
+// ===== LANGUAGE =====
+function setLang(lang) {
+  APP.lang = lang;
+  document.querySelectorAll('.lang-btn').forEach(b => b.classList.toggle('active', b.dataset.lang === lang));
+  updateI18N();
+  saveState();
+}
+
+// ===== SETTINGS TOGGLES =====
+function toggleSetting(key) {
+  if (key === 'sound') {
+    APP.soundEnabled = !APP.soundEnabled;
+    document.getElementById('toggleSound').classList.toggle('on', APP.soundEnabled);
+  } else if (key === 'tts') {
+    APP.ttsEnabled = !APP.ttsEnabled;
+    document.getElementById('toggleTTS').classList.toggle('on', APP.ttsEnabled);
+    NAV.ttsEnabled = APP.ttsEnabled;
+  } else if (key === 'scan') {
+    APP.scanEnabled = !APP.scanEnabled;
+    document.getElementById('toggleScan').classList.toggle('on', APP.scanEnabled);
+    APP.scanEnabled ? startScanInterval() : stopScanInterval();
+  } else if (key === 'scanHistory') {
+    APP.scanHistory = !APP.scanHistory;
+    document.getElementById('toggleScanHistory').classList.toggle('on', APP.scanHistory);
+  } else if (key === 'mapRotate') {
+    APP.mapRotate = !APP.mapRotate;
+    document.getElementById('toggleMapRotate').classList.toggle('on', APP.mapRotate);
+  } else if (key === 'speed') {
+    APP.speedEnabled = !APP.speedEnabled;
+    document.getElementById('toggleSpeed').classList.toggle('on', APP.speedEnabled);
+    document.getElementById('speedHud').style.display = APP.speedEnabled ? 'block' : 'none';
+  } else if (key === 'darkTiles') {
+    APP.darkTiles = !APP.darkTiles;
+    document.getElementById('toggleDarkTiles').classList.toggle('on', APP.darkTiles);
+    applyTileTheme();
+  }
+  saveState();
+}
+
+let currentTileLayer = null;
+function applyTileTheme() {
+  if (currentTileLayer) { map.removeLayer(currentTileLayer); currentTileLayer = null; }
+  const url = APP.darkTiles
+    ? 'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png'
+    : 'https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png';
+  const attr = '© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> © <a href="https://carto.com/">CARTO</a>';
+  currentTileLayer = L.tileLayer(url, {
+    attribution: attr, maxZoom: 20, subdomains: ['a','b','c','d'],
+    detectRetina: true, keepBuffer: 6
+  }).addTo(map);
+}
+
+function saveAPIKeys() {
+  APP.apiKeys.gemini = document.getElementById('geminiKey').value.trim();
+  APP.apiKeys.groq = document.getElementById('groqKey').value.trim();
+  APP.aiModel = document.getElementById('aiModel').value;
+  saveState();
+  showToast(t('toast_saved'), 'success');
+}
+
+// ===== IMPORT / EXPORT =====
+function exportData() {
+  const data = {
+    version: '2.0',
+    app: '¿A Donde?',
+    exported: new Date().toISOString(),
+    places: APP.places,
+    favorites: APP.favorites,
+    links: APP.links,
+    notes: APP.notes,
+    folders: APP.folders,
+    customButtons: APP.customButtons,
+    settings: { lang: APP.lang, theme: APP.theme, soundEnabled: APP.soundEnabled }
+  };
+  const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = `adonde_backup_${new Date().toISOString().slice(0,10)}.json`;
+  a.click();
+  showToast(t('toast_export'), 'success');
+}
+
+function importData(event) {
+  const file = event.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = (e) => {
+    try {
+      const data = JSON.parse(e.target.result);
+      if (data.places) APP.places = [...APP.places, ...data.places.filter(p => !APP.places.find(ep => ep.id === p.id))];
+      if (data.favorites) APP.favorites = [...new Set([...APP.favorites, ...data.favorites])];
+      if (data.links) APP.links = [...data.links, ...APP.links];
+      if (data.notes) APP.notes = [...data.notes, ...APP.notes];
+      if (data.folders) APP.folders = [...data.folders, ...APP.folders.filter(f => !data.folders.find(df => df.id === f.id))];
+      if (data.customButtons) APP.customButtons = [...data.customButtons, ...APP.customButtons];
+      if (data.settings) {
+        if (data.settings.lang) setLang(data.settings.lang);
+        if (data.settings.theme) setTheme(data.settings.theme);
+      }
+      saveState();
+      renderMarkers(APP.currentCat);
+      showToast(t('toast_import'), 'success');
+    } catch (err) {
+      showToast('Import error: ' + err.message, 'error');
+    }
+  };
+  reader.readAsText(file);
+  event.target.value = '';
+}
+
+// ===== STATE PERSISTENCE =====
+function saveState() {
+  try {
+    const state = {
+      lang: APP.lang, theme: APP.theme, soundEnabled: APP.soundEnabled,
+      ttsEnabled: APP.ttsEnabled, ttsLang: APP.ttsLang,
+      scanEnabled: APP.scanEnabled, scanHistory: APP.scanHistory,
+      mapRotate: APP.mapRotate, speedEnabled: APP.speedEnabled, darkTiles: APP.darkTiles,
+      favorites: APP.favorites, links: APP.links, notes: APP.notes,
+      folders: APP.folders, customButtons: APP.customButtons,
+      places: APP.places, apiKeys: APP.apiKeys, aiModel: APP.aiModel
+    };
+    localStorage.setItem('adonde_state', JSON.stringify(state));
+  } catch(e) { console.warn('Could not save to localStorage:', e); }
+}
+
+function loadState() {
+  try {
+    const saved = localStorage.getItem('adonde_state');
+    if (saved) {
+      const state = JSON.parse(saved);
+      APP.lang = state.lang || 'es';
+      APP.theme = state.theme || 'dark';
+      APP.soundEnabled = state.soundEnabled || false;
+      APP.ttsEnabled = state.ttsEnabled || false;
+      APP.ttsLang = state.ttsLang || 'en-GB';
+      APP.scanEnabled = state.scanEnabled || false;
+      APP.scanHistory = state.scanHistory !== false;
+      APP.mapRotate = state.mapRotate || false;
+      APP.speedEnabled = state.speedEnabled || false;
+      APP.darkTiles = state.darkTiles || false;
+      APP.favorites = state.favorites || [];
+      APP.links = state.links || [];
+      APP.notes = state.notes || [];
+      APP.folders = state.folders || [];
+      APP.customButtons = state.customButtons || [];
+      APP.apiKeys = state.apiKeys || { gemini: '', groq: '' };
+      APP.aiModel = state.aiModel || 'gemini-3.1-pro-preview';
+      if (state.places && state.places.length > 0) {
+        APP.places = state.places;
+      } else {
+        APP.places = getDefaultPlaces();
+      }
+    } else {
+      APP.places = getDefaultPlaces();
+    }
+    // Load scan history
+    const sh = localStorage.getItem('adonde_scan_history');
+    if (sh) SCANNER.history = JSON.parse(sh);
+  } catch(e) {
+    APP.places = getDefaultPlaces();
+  }
+}
+
+function loadPlaces() {
+  // Places already loaded in loadState
+}
+
+// ===== TOAST =====
+function showToast(msg, type) {
+  const toast = document.getElementById('toast');
+  toast.textContent = msg;
+  toast.className = 'toast show' + (type ? ' ' + type : '');
+  setTimeout(() => toast.className = 'toast', 3000);
+}
+
+// ===== PWA INSTALL =====
+let deferredPrompt;
+window.addEventListener('beforeinstallprompt', (e) => {
+  e.preventDefault();
+  deferredPrompt = e;
+  document.getElementById('installBanner').style.display = 'flex';
+});
+
+function installPWA() {
+  if (deferredPrompt) {
+    deferredPrompt.prompt();
+    deferredPrompt.userChoice.then(result => {
+      deferredPrompt = null;
+      document.getElementById('installBanner').style.display = 'none';
+    });
+  }
+}
+
+function dismissInstall() {
+  document.getElementById('installBanner').style.display = 'none';
+}
+
+// ===== SHARE TARGET =====
+function checkSharedContent() {
+  const params = new URLSearchParams(window.location.search);
+  const sharedUrl = params.get('shared_url') || params.get('url');
+  const sharedText = params.get('shared_text') || params.get('text');
+  const sharedTitle = params.get('shared_title') || params.get('title');
+  if (sharedUrl || sharedText) {
+    const url = sharedUrl || sharedText;
+    APP.links.unshift({ id: Date.now(), url, title: sharedTitle || url, date: new Date().toLocaleDateString(), folder: '' });
+    saveState();
+    showToast('Link guardado desde compartir', 'success');
+    history.replaceState({}, '', window.location.pathname);
+  }
+}
+
+// ===== OFFLINE DETECTION =====
+function updateOnlineStatus() {
+  const bar = document.getElementById('offlineBar');
+  bar.style.display = navigator.onLine ? 'none' : 'block';
+}
+window.addEventListener('online', updateOnlineStatus);
+window.addEventListener('offline', updateOnlineStatus);
+
+// ===== UTILITY =====
+function escHTML(str) {
+  const div = document.createElement('div');
+  div.textContent = str;
+  return div.innerHTML;
+}
+function escHTMLattr(str) {
+  return String(str).replace(/'/g,"&#39;").replace(/"/g,"&quot;");
+}
+
+/* ═══════════════════════════════════════════════════
+   NAVIGATION ENGINE — Turn-by-turn with TTS
+   ═══════════════════════════════════════════════════ */
+const NAV = {
+  active: false,
+  destLat: 0, destLng: 0, destName: '',
+  routeLine: null,       // blue polyline full route
+  traveledLine: null,    // green polyline traveled
+  traveledCoords: [],
+  watchId: null,
+  lastLat: 0, lastLng: 0,
+  totalDist: 0,
+  steps: [],             // turn-by-turn steps (OSRM)
+  currentStepIdx: 0,
+  ttsEnabled: false,
+  lastSpoken: '',
+  arrivalRadius: 30      // meters
+};
+
+function startNavigation(lat, lng, name) {
+  map.closePopup();
+  NAV.destLat = lat; NAV.destLng = lng; NAV.destName = name;
+  NAV.active = true;
+  NAV.traveledCoords = [];
+  NAV.currentStepIdx = 0;
+  NAV.ttsEnabled = APP.ttsEnabled;
+
+  document.getElementById('navBar').classList.add('active');
+  document.getElementById('navDest').textContent = '→ ' + name;
+  document.getElementById('navInstText').textContent = 'Calculando ruta…';
+  document.getElementById('navTtsBtn').classList.toggle('active', NAV.ttsEnabled);
+
+  // Draw destination marker with pulse
+  if (NAV.destMarker) map.removeLayer(NAV.destMarker);
+  NAV.destMarker = L.marker([lat, lng], {
+    icon: L.divIcon({
+      html: `<div style="width:28px;height:28px;background:#ff3355;border:3px solid #fff;border-radius:50%;box-shadow:0 0 16px rgba(255,51,85,.7);animation:pulse 1.5s infinite;display:flex;align-items:center;justify-content:center;"><i class="fas fa-flag" style="color:#fff;font-size:11px"></i></div>`,
+      className:'',iconSize:[28,28],iconAnchor:[14,14]
+    })
+  }).addTo(map).bindPopup('<b>🏁 ' + escHTML(name) + '</b>');
+
+  fetchRoute(APP.userLat, APP.userLng, lat, lng);
+  startGPSTracking();
+  showToast('Navegación iniciada → ' + name, 'success');
+  speakInstruction('Navigation started. Heading to ' + name, 'en-GB');
+}
+
+async function fetchRoute(fromLat, fromLng, toLat, toLng) {
+  try {
+    const url = `https://router.project-osrm.org/route/v1/foot/${fromLng},${fromLat};${toLng},${toLat}?overview=full&geometries=geojson&steps=true&annotations=false`;
+    const resp = await fetch(url);
+    const data = await resp.json();
+    if (data.code !== 'Ok' || !data.routes[0]) throw new Error('No route found');
+
+    const route = data.routes[0];
+    const coords = route.geometry.coordinates.map(c => [c[1], c[0]]);
+    NAV.totalDist = route.distance;
+    NAV.steps = [];
+
+    // Extract steps
+    route.legs[0].steps.forEach(s => {
+      if (s.name || s.maneuver) {
+        NAV.steps.push({
+          instruction: buildStepInstruction(s),
+          lat: s.maneuver.location[1],
+          lng: s.maneuver.location[0],
+          distance: s.distance
+        });
+      }
+    });
+
+    // Draw full route line (blue)
+    if (NAV.routeLine) map.removeLayer(NAV.routeLine);
+    NAV.routeLine = L.polyline(coords, {
+      color: '#2979ff', weight: 5, opacity: 0.85,
+      dashArray: null, lineCap: 'round', lineJoin: 'round'
+    }).addTo(map);
+
+    // Draw traveled line (green, starts empty)
+    if (NAV.traveledLine) map.removeLayer(NAV.traveledLine);
+    NAV.traveledLine = L.polyline([], {
+      color: '#00c853', weight: 6, opacity: 0.9,
+      lineCap: 'round', lineJoin: 'round'
+    }).addTo(map);
+
+    map.fitBounds(NAV.routeLine.getBounds().pad(0.15));
+    updateNavUI();
+    if (NAV.steps[0]) speakInstruction(NAV.steps[0].instruction, APP.ttsLang || 'en-GB');
+
+  } catch(e) {
+    // Fallback: straight line
+    if (NAV.routeLine) map.removeLayer(NAV.routeLine);
+    NAV.routeLine = L.polyline([[APP.userLat, APP.userLng],[NAV.destLat, NAV.destLng]], {
+      color:'#2979ff', weight:5, opacity:.8, dashArray:'10,8'
+    }).addTo(map);
+    if (NAV.traveledLine) map.removeLayer(NAV.traveledLine);
+    NAV.traveledLine = L.polyline([], { color:'#00c853', weight:6 }).addTo(map);
+    NAV.totalDist = haversine(APP.userLat, APP.userLng, NAV.destLat, NAV.destLng);
+    document.getElementById('navInstText').textContent = 'Sigue recto hacia el destino';
+  }
+}
+
+function buildStepInstruction(step) {
+  const type = step.maneuver.type;
+  const mod = step.maneuver.modifier || '';
+  const name = step.name || '';
+  const dirMap = {
+    'turn left':'Gira a la izquierda', 'turn right':'Gira a la derecha',
+    'turn slight left':'Gira levemente a la izquierda', 'turn slight right':'Gira levemente a la derecha',
+    'turn sharp left':'Gira bruscamente a la izquierda', 'turn sharp right':'Gira bruscamente a la derecha',
+    'continue':'Continúa recto', 'arrive':'Has llegado',
+    'depart':'Sal', 'roundabout':'Incorpora la rotonda', 'merge':'Incorpora la vía',
+    'fork':'Toma el desvío', 'end of road':'Final de la calle', 'straight':'Sigue recto'
+  };
+  const key = type === 'turn' ? type + ' ' + mod : type;
+  const base = dirMap[key] || dirMap[type + ' ' + mod] || 'Continúa';
+  return name ? base + ' en ' + name : base;
+}
+
+function startGPSTracking() {
+  if (NAV.watchId) navigator.geolocation.clearWatch(NAV.watchId);
+  NAV.watchId = navigator.geolocation.watchPosition(
+    (pos) => {
+      const lat = pos.coords.latitude, lng = pos.coords.longitude;
+      const spd = pos.coords.speed != null ? pos.coords.speed * 3.6 : 0; // m/s → km/h
+      APP.userLat = lat; APP.userLng = lng;
+
+      // Update user marker
+      if (APP.userMarker) {
+        APP.userMarker.setLatLng([lat, lng]);
+        if (APP.mapRotate && pos.coords.heading != null) {
+          map.setBearing && map.setBearing(pos.coords.heading);
+        }
+      }
+
+      // Update speed HUD
+      if (APP.speedEnabled) {
+        document.getElementById('speedVal').textContent = Math.round(spd);
+      }
+
+      // Update traveled line
+      NAV.traveledCoords.push([lat, lng]);
+      if (NAV.traveledLine) NAV.traveledLine.setLatLngs(NAV.traveledCoords);
+
+      // Follow user on map
+      map.setView([lat, lng], map.getZoom());
+
+      // Check arrival
+      const distToDest = haversine(lat, lng, NAV.destLat, NAV.destLng);
+      if (distToDest < NAV.arrivalRadius) { onArrival(); return; }
+
+      // Advance steps
+      if (NAV.steps.length > 0 && NAV.currentStepIdx < NAV.steps.length - 1) {
+        const nextStep = NAV.steps[NAV.currentStepIdx + 1];
+        const distToStep = haversine(lat, lng, nextStep.lat, nextStep.lng);
+        if (distToStep < 25) {
+          NAV.currentStepIdx++;
+          const inst = NAV.steps[NAV.currentStepIdx].instruction;
+          if (inst !== NAV.lastSpoken) speakInstruction(inst, APP.ttsLang || 'en-GB');
+        }
+        // Pre-announce next step 80m ahead
+        const curStep = NAV.steps[NAV.currentStepIdx];
+        const distToCur = haversine(lat, lng, curStep.lat, curStep.lng);
+        if (distToCur < 80 && distToCur > 20 && curStep.instruction !== NAV.lastSpoken) {
+          speakInstruction('En ' + Math.round(distToCur) + ' metros, ' + curStep.instruction, APP.ttsLang || 'en-GB');
+        }
+      }
+
+      updateNavUI();
+      NAV.lastLat = lat; NAV.lastLng = lng;
+    },
+    (err) => { console.warn('[GPS]', err.message); },
+    { enableHighAccuracy: true, timeout: 5000, maximumAge: 1000 }
+  );
+}
+
+function updateNavUI() {
+  const dist = haversine(APP.userLat, APP.userLng, NAV.destLat, NAV.destLng);
+  const distStr = dist >= 1000 ? (dist/1000).toFixed(1) + ' km' : Math.round(dist) + ' m';
+  document.getElementById('navDistText').textContent = distStr + ' restantes';
+  const progress = NAV.totalDist > 0 ? Math.min(100, ((NAV.totalDist - dist) / NAV.totalDist) * 100) : 0;
+  document.getElementById('navProgressBar').style.width = progress + '%';
+  if (NAV.steps[NAV.currentStepIdx]) {
+    const step = NAV.steps[NAV.currentStepIdx];
+    document.getElementById('navInstText').textContent = step.instruction;
+    updateNavArrow(step);
+  }
+}
+
+function updateNavArrow(step) {
+  const arrow = document.getElementById('navArrow');
+  const inst = step.instruction.toLowerCase();
+  const arrowMap = [
+    ['izquierda','fa-arrow-left'],['derecha','fa-arrow-right'],
+    ['recto','fa-arrow-up'],['continúa','fa-arrow-up'],
+    ['llegado','fa-flag-checkered'],['rotonda','fa-sync-alt'],
+    ['desvío','fa-random'],['sal','fa-sign-out-alt']
+  ];
+  arrow.className = 'fas fa-arrow-up';
+  for (const [kw, cls] of arrowMap) { if (inst.includes(kw)) { arrow.className = 'fas ' + cls; break; } }
+}
+
+function onArrival() {
+  stopNavigation();
+  const msgs = {
+    'en-GB': "You have arrived at your destination!",
+    'es-ES': "¡Has llegado a tu destino!",
+    'zh-HK': "你已到達目的地！",
+    'zh-CN': "您已到达目的地！"
+  };
+  const lang = APP.ttsLang || 'en-GB';
+  speakInstruction(msgs[lang] || msgs['en-GB'], lang);
+  speakInstruction(msgs['es-ES'], 'es-ES');
+  showToast('🏁 ¡Has llegado a ' + NAV.destName + '!', 'success');
+}
+
+function stopNavigation() {
+  NAV.active = false;
+  if (NAV.watchId) { navigator.geolocation.clearWatch(NAV.watchId); NAV.watchId = null; }
+  if (NAV.routeLine) { map.removeLayer(NAV.routeLine); NAV.routeLine = null; }
+  if (NAV.traveledLine) { map.removeLayer(NAV.traveledLine); NAV.traveledLine = null; }
+  if (NAV.destMarker) { map.removeLayer(NAV.destMarker); NAV.destMarker = null; }
+  document.getElementById('navBar').classList.remove('active');
+  NAV.traveledCoords = [];
+  NAV.steps = [];
+  window.speechSynthesis && window.speechSynthesis.cancel();
+}
+
+function toggleNavTTS() {
+  NAV.ttsEnabled = !NAV.ttsEnabled;
+  APP.ttsEnabled = NAV.ttsEnabled;
+  document.getElementById('navTtsBtn').style.background = NAV.ttsEnabled ? 'var(--accent)' : '';
+  document.getElementById('navTtsBtn').style.color = NAV.ttsEnabled ? 'var(--bg)' : '';
+  saveState();
+}
+
+function repeatLastInstruction() {
+  if (NAV.steps[NAV.currentStepIdx]) {
+    speakInstruction(NAV.steps[NAV.currentStepIdx].instruction, APP.ttsLang || 'en-GB', true);
+  }
+}
+
+/* ═══ TTS ENGINE ═══ */
+const NAV_TRANSLATIONS = {
+  'en-GB': {
+    'Gira a la izquierda': 'Turn left', 'Gira a la derecha': 'Turn right',
+    'Gira levemente a la izquierda': 'Turn slight left', 'Gira levemente a la derecha': 'Turn slight right',
+    'Gira bruscamente a la izquierda': 'Turn sharp left', 'Gira bruscamente a la derecha': 'Turn sharp right',
+    'Continúa recto': 'Continue straight', 'Continúa': 'Continue', 'Sigue recto': 'Go straight',
+    'Has llegado': 'You have arrived', 'Sal': 'Depart', 'Incorpora la rotonda': 'Enter the roundabout',
+    'Incorpora la vía': 'Merge onto road', 'Toma el desvío': 'Take the fork', 'Final de la calle': 'End of road',
+    'Navigation started. Heading to': 'Navigation started. Heading to',
+    'En': 'In', 'metros,': 'meters,', 'Calculando ruta…': 'Calculating route…',
+    'Sigue recto hacia el destino': 'Go straight to destination'
+  },
+  'zh-HK': {
+    'Gira a la izquierda': '左轉', 'Gira a la derecha': '右轉',
+    'Gira levemente a la izquierda': '稍微左轉', 'Gira levemente a la derecha': '稍微右轉',
+    'Gira bruscamente a la izquierda': '急左轉', 'Gira bruscamente a la derecha': '急右轉',
+    'Continúa recto': '直行', 'Continúa': '繼續', 'Sigue recto': '直行',
+    'Has llegado': '你已到達', 'Sal': '出發', 'Incorpora la rotonda': '進入圓形交叉路',
+    'Incorpora la vía': '併入道路', 'Toma el desvío': '走分叉路', 'Final de la calle': '街道盡頭',
+    'Navigation started. Heading to': '導航開始，前往', 'En': '喺',
+    'metros,': '米後，', 'Sigue recto hacia el destino': '直行往目的地'
+  },
+  'zh-CN': {
+    'Gira a la izquierda': '左转', 'Gira a la derecha': '右转',
+    'Gira levemente a la izquierda': '稍微左转', 'Gira levemente a la derecha': '稍微右转',
+    'Gira bruscamente a la izquierda': '急左转', 'Gira bruscamente a la derecha': '急右转',
+    'Continúa recto': '直行', 'Continúa': '继续', 'Sigue recto': '直行',
+    'Has llegado': '您已到达', 'Sal': '出发', 'Incorpora la rotonda': '进入环形交叉路',
+    'Incorpora la vía': '并入道路', 'Toma el desvío': '走分叉路', 'Final de la calle': '街道尽头',
+    'Navigation started. Heading to': '导航开始，前往', 'En': '在',
+    'metros,': '米后，', 'Sigue recto hacia el destino': '直行到目的地'
+  }
+};
+
+function translateInstruction(text, lang) {
+  if (lang === 'es-ES') return text; // already Spanish
+  const dict = NAV_TRANSLATIONS[lang];
+  if (!dict) return text;
+  let result = text;
+  for (const [es, tr] of Object.entries(dict)) {
+    result = result.replace(new RegExp(es, 'g'), tr);
+  }
+  return result;
+}
+
+function speakInstruction(text, lang, force) {
+  if ((!APP.ttsEnabled && !force) || !window.speechSynthesis) return;
+  if (text === NAV.lastSpoken && !force) return;
+  NAV.lastSpoken = text;
+  window.speechSynthesis.cancel();
+  const ttsLang = lang || APP.ttsLang || 'en-GB';
+  const translated = translateInstruction(text, ttsLang);
+  const utt = new SpeechSynthesisUtterance(translated);
+  utt.lang = ttsLang;
+  utt.rate = 0.92; utt.pitch = 1; utt.volume = 1;
+  const voices = window.speechSynthesis.getVoices();
+  // Try exact lang match, then prefix match
+  const match = voices.find(v => v.lang === ttsLang) ||
+                voices.find(v => v.lang.startsWith(ttsLang.slice(0,5))) ||
+                voices.find(v => v.lang.startsWith(ttsLang.slice(0,2)));
+  if (match) utt.voice = match;
+  window.speechSynthesis.speak(utt);
+}
+
+function testTTS() {
+  const lang = document.getElementById('ttsLangSel').value;
+  const msgs = {
+    'en-GB': "Navigation voice test. Turn left in 50 meters.",
+    'es-ES': "Prueba de voz. Gira a la izquierda en 50 metros.",
+    'zh-HK': "語音測試。50米後左轉。",
+    'zh-CN': "语音测试。50米后左转。"
+  };
+  APP.ttsEnabled = true; APP.ttsLang = lang;
+  speakInstruction(msgs[lang] || msgs['en-GB'], lang, true);
+}
+
+/* ═══ HAVERSINE DISTANCE (meters) ═══ */
+function haversine(lat1, lon1, lat2, lon2) {
+  const R = 6371000;
+  const dLat = (lat2 - lat1) * Math.PI / 180;
+  const dLon = (lon2 - lon1) * Math.PI / 180;
+  const a = Math.sin(dLat/2)**2 + Math.cos(lat1*Math.PI/180)*Math.cos(lat2*Math.PI/180)*Math.sin(dLon/2)**2;
+  return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+}
+
+/* ═══════════════════════════════════════════════════
+   PROXIMITY SCANNER — Detects new nearby places
+   ═══════════════════════════════════════════════════ */
+const SCANNER = {
+  interval: null,
+  pending: [],
+  history: {},  // { 'YYYY-MM-DD': [{name,cat,lat,lng,ts}] }
+  radius: 300,  // meters
+  lastScanLat: 0, lastScanLng: 0
+};
+
+const SCAN_POI_CATEGORIES = [
+  { cat:'7eleven', label:'7-Eleven', color:'#e60012', icon:'fa-store',
+    keywords:['7-eleven','7eleven','711','convenience'] },
+  { cat:'bus', label:'Bus Stop', color:'#f7941e', icon:'fa-bus',
+    keywords:['bus stop','巴士站','kmb','citybus'] },
+  { cat:'minibus', label:'Minibus', color:'#0066cc', icon:'fa-shuttle-van',
+    keywords:['minibus','小巴'] },
+  { cat:'restaurant', label:'Restaurant', color:'#cc3333', icon:'fa-utensils',
+    keywords:['restaurant','cafe','茶餐廳','food','cha chaan teng'] },
+  { cat:'parkshop', label:'ParkShop/Wellcome', color:'#00aa44', icon:'fa-shopping-cart',
+    keywords:['parkshop','wellcome','supermarket','超市'] },
+  { cat:'hospital', label:'Medical', color:'#cc0055', icon:'fa-hospital',
+    keywords:['clinic','pharmacy','doctor','medical','藥房','診所'] }
+];
+
+async function scanNearbyPlaces() {
+  if (!APP.scanEnabled || !APP.hasLocation) return;
+  // Only scan if moved >50m since last scan
+  if (haversine(APP.userLat, APP.userLng, SCANNER.lastScanLat, SCANNER.lastScanLng) < 50) return;
+  SCANNER.lastScanLat = APP.userLat; SCANNER.lastScanLng = APP.userLng;
+
+  const geminiKey = APP.apiKeys.gemini;
+  if (!geminiKey) return; // needs AI key
+
+  try {
+    const prompt = `You are a Hong Kong location database assistant. The user is at coordinates ${APP.userLat.toFixed(5)}, ${APP.userLng.toFixed(5)}.
+List 3-5 real places that might exist very near this location in Hong Kong (within 300 meters).
+Focus on: 7-Eleven, bus stops, minibus stops, restaurants, ParkShop, Wellcome, pharmacies, clinics.
+Return ONLY a JSON array. Each object: {id:"scan_unique", name:"Place English + Chinese", cat:"category", lat:number, lng:number, addr:"short address", icon:"fa-store", color:"#hex"}
+Categories allowed: 7eleven, bus, minibus, restaurant, parkshop, hospital`;
+
+    const scanModelId = getGeminiModelId(APP.aiModel);
+    const resp = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${scanModelId}:generateContent?key=${geminiKey}`, {
+      method: 'POST', headers: {'Content-Type':'application/json'},
+      body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }] })
+    });
+    const data = await resp.json();
+    const text = data.candidates?.[0]?.content?.parts?.[0]?.text || '';
+    const jsonMatch = text.match(/\[[\s\S]*\]/);
+    if (!jsonMatch) return;
+
+    const places = JSON.parse(jsonMatch[0]);
+    const newPlaces = places.filter(p =>
+      p.lat && p.lng &&
+      !APP.places.find(ep => ep.name === p.name || (Math.abs(ep.lat-p.lat)<0.0005 && Math.abs(ep.lng-p.lng)<0.0005))
+    );
+
+    if (newPlaces.length === 0) return;
+
+    // Store as pending
+    SCANNER.pending = newPlaces;
+    showScanBubble(newPlaces);
+
+    // Save to history if enabled
+    if (APP.scanHistory) {
+      const today = new Date().toISOString().slice(0,10);
+      if (!SCANNER.history[today]) SCANNER.history[today] = [];
+      newPlaces.forEach(p => {
+        SCANNER.history[today].push({ name: p.name, cat: p.cat, lat: p.lat, lng: p.lng, ts: Date.now() });
+      });
+      localStorage.setItem('adonde_scan_history', JSON.stringify(SCANNER.history));
+    }
+  } catch(e) { console.warn('[Scanner]', e.message); }
+}
+
+function showScanBubble(places) {
+  document.getElementById('scanBubbleList').innerHTML = places.map(p =>
+    `<div style="padding:4px 0;border-bottom:1px solid var(--border)">
+      <i class="fas ${p.icon||'fa-map-marker-alt'}" style="color:${p.color||'var(--accent)'}"></i>
+      <strong>${escHTML(p.name)}</strong><br>
+      <span style="font-size:.72rem">${escHTML(p.addr||'')}</span>
+    </div>`
+  ).join('');
+  document.getElementById('scanBubble').style.display = 'block';
+  // Auto-dismiss after 12s if no action
+  setTimeout(() => { if (document.getElementById('scanBubble').style.display !== 'none') dismissScanBubble(); }, 12000);
+}
+
+function confirmScanAdd() {
+  SCANNER.pending.forEach(p => {
+    const id = 'scan_' + Date.now() + '_' + Math.random().toString(36).slice(2,6);
+    APP.places.push({ ...p, id });
+  });
+  saveState();
+  renderMarkers(APP.currentCat);
+  showToast(SCANNER.pending.length + ' nuevos lugares añadidos', 'success');
+  SCANNER.pending = [];
+  dismissScanBubble();
+}
+
+function dismissScanBubble() {
+  document.getElementById('scanBubble').style.display = 'none';
+  SCANNER.pending = [];
+}
+
+function startScanInterval() {
+  if (SCANNER.interval) clearInterval(SCANNER.interval);
+  SCANNER.interval = setInterval(scanNearbyPlaces, 45000); // every 45s
+}
+
+function stopScanInterval() {
+  if (SCANNER.interval) { clearInterval(SCANNER.interval); SCANNER.interval = null; }
+}
+
+function showScanHistory() {
+  closePanel('settings');
+  const hist = SCANNER.history;
+  const days = Object.keys(hist).sort().reverse();
+  if (days.length === 0) {
+    document.getElementById('scanHistoryContent').innerHTML = '<p style="color:var(--text2)">No hay historial de escaneo aún.</p>';
+  } else {
+    document.getElementById('scanHistoryContent').innerHTML = days.map(d =>
+      `<div style="margin-bottom:12px">
+        <strong style="color:var(--accent)">${d}</strong> — ${hist[d].length} lugares detectados<br>
+        ${hist[d].map(p => `<div style="padding:2px 0"><i class="fas fa-circle" style="font-size:.5rem;color:var(--text2)"></i> ${escHTML(p.name)}</div>`).join('')}
+      </div>`
+    ).join('');
+  }
+  document.getElementById('modalScanHistory').classList.add('show');
+}
+
+
+/* ═══ TRANSPORT MODE SELECTION ═══ */
+let _pendingNavLat = 0, _pendingNavLng = 0, _pendingNavName = '';
+
+function openTransportModal(lat, lng, name) {
+  _pendingNavLat = lat; _pendingNavLng = lng; _pendingNavName = name;
+  document.getElementById('transportDestName').textContent = '📍 ' + name;
+  document.querySelectorAll('.transport-mode-btn').forEach(b => { b.style.background = ''; b.style.color = ''; });
+  document.getElementById('modalTransport').classList.add('show');
+}
+
+function selectTransportMode(mode) {
+  closeModal('modalTransport');
+  map.closePopup();
+  const gmModes = { mtr:'transit', bus:'transit', minibus:'transit', taxi:'driving', driving:'driving', bicycle:'bicycling' };
+  if (mode !== 'foot') {
+    const gmMode = gmModes[mode] || 'transit';
+    const url = `https://www.google.com/maps/dir/?api=1&destination=${_pendingNavLat},${_pendingNavLng}&travelmode=${gmMode}`;
+    window.open(url, '_blank');
+  } else {
+    startNavigation(_pendingNavLat, _pendingNavLng, _pendingNavName);
+  }
+}
+
+/* ═══════════════════════════════════════════════════
+   CATEGORY DROPDOWN GROUPS
+   ═══════════════════════════════════════════════════ */
+function toggleCatGroup(id) {
+  const grp = document.getElementById(id);
+  const wasOpen = grp.classList.contains('open');
+  closeCatGroups();
+  if (!wasOpen) grp.classList.add('open');
+}
+function closeCatGroups() {
+  document.querySelectorAll('.cat-group').forEach(g => g.classList.remove('open'));
+  document.querySelectorAll('.cat-group-btn').forEach(b => b.classList.remove('open'));
+}
+// Close dropdowns when clicking outside
+document.addEventListener('click', (e) => {
+  if (!e.target.closest('.cat-group')) closeCatGroups();
+});
+
+// Override filterCategory to handle new cat types and update active chip
+function filterCategory(cat) {
+  APP.currentCat = cat;
+  // Update active state on visible chips
+  document.querySelectorAll('.cat-chip[data-cat]').forEach(c =>
+    c.classList.toggle('active', c.dataset.cat === cat)
+  );
+  renderMarkers(cat);
+  closeCatGroups();
+  playClick();
+}
+
+// Extended renderMarkers supporting all new categories
+function renderMarkers(filter) {
+  APP.markers.forEach(m => map.removeLayer(m));
+  APP.markers = [];
+  let places = APP.places;
+  if (filter && filter !== 'all') {
+    places = places.filter(p => p.cat === filter);
+  }
+  places.forEach(p => {
+    const isFav = APP.favorites.includes(p.id);
+    let popup = `<div class="popup-title">${p.name}</div>`;
+    popup += `<div class="popup-cat">${p.cat.toUpperCase()}${p.cuisine?' · '+p.cuisine:''}${p.line?' · '+p.line:''}${p.routes?' · '+p.routes:''}</div>`;
+    popup += `<div class="popup-addr"><i class="fas fa-map-marker-alt"></i> ${p.addr}</div>`;
+    if (p.hours) popup += `<div style="font-size:.8rem"><i class="fas fa-clock"></i> ${p.hours}</div>`;
+    if (p.delivery) popup += `<div class="delivery-badge"><i class="fas fa-motorcycle"></i> Delivery</div>`;
+    if (p.phone) popup += `<div style="font-size:.82rem;margin-top:4px"><i class="fas fa-phone"></i> <a href="tel:${p.phone}" style="color:var(--accent)">${p.phone}</a></div>`;
+    if (p.website) popup += `<div style="font-size:.82rem"><i class="fas fa-globe"></i> <a href="${p.website}" target="_blank" style="color:var(--accent)">Web</a></div>`;
+    if (p.social) popup += `<div style="font-size:.82rem"><i class="fas fa-globe"></i> ${p.social}</div>`;
+    if (p.emergency) popup += `<div class="badge badge-open" style="margin-top:4px">🚨 24h</div>`;
+    if (p.ageRange) popup += `<div style="font-size:.78rem;color:var(--accent2)"><i class="fas fa-child"></i> ${p.ageRange}</div>`;
+    popup += `<div class="popup-btns">`;
+    popup += `<button class="popup-btn go-btn" onclick="openTransportModal(${p.lat},${p.lng},'${escHTMLattr(p.name)}')"><i class="fas fa-route"></i> Go / 去</button>`;
+    popup += `<button class="popup-btn" onclick="getDirections(${p.lat},${p.lng})"><i class="fas fa-directions"></i> ${t('directions')}</button>`;
+    popup += `<button class="popup-btn fav" onclick="toggleFavorite('${p.id}')"><i class="fas fa-star"></i> ${isFav?'★':'☆'}</button>`;
+    if (p.cat === 'mtr') popup += `<button class="popup-btn mtr-events" onclick="openMTREvents('${escHTMLattr(p.name)}',${p.lat},${p.lng})"><i class="fas fa-calendar-star"></i> Eventos IA</button>`;
+    popup += `</div>`;
+    const marker = L.marker([p.lat, p.lng], { icon: getCatIcon(p.cat, p.color) })
+      .bindPopup(popup, { maxWidth: 300 }).addTo(map);
+    APP.markers.push(marker);
+  });
+}
+
+/* ═══════════════════════════════════════════════════
+   MTR EVENTS & OFFERS (AI-powered)
+   ═══════════════════════════════════════════════════ */
+let mtrEventsCache = {}; // {stationName: {date: [...events]}}
+let currentMTRStation = '';
+
+function openMTREvents(stationName, lat, lng) {
+  currentMTRStation = stationName;
+  document.getElementById('mtrEventsStation').innerHTML =
+    `<i class="fas fa-train" style="color:#ff6600"></i> <strong>${escHTML(stationName)}</strong>`;
+  document.getElementById('mtrEventsList').innerHTML = '';
+  document.getElementById('mtrEventsLoading').style.display = 'none';
+  // Set default date range: today → 1 month
+  const now = new Date();
+  document.getElementById('mtrDateFrom').value = now.toISOString().slice(0,10);
+  const end = new Date(); end.setMonth(end.getMonth()+1);
+  document.getElementById('mtrDateTo').value = end.toISOString().slice(0,10);
+  document.getElementById('modalMTREvents').classList.add('show');
+  // Auto-load if cached
+  if (mtrEventsCache[stationName]) {
+    renderMTREvents(mtrEventsCache[stationName]);
+  }
+}
+
+function setMTRDateRange(days) {
+  const now = new Date();
+  document.getElementById('mtrDateFrom').value = now.toISOString().slice(0,10);
+  const end = new Date(); end.setDate(end.getDate()+days);
+  document.getElementById('mtrDateTo').value = end.toISOString().slice(0,10);
+}
+
+function filterMTREventsByDate() {
+  const from = document.getElementById('mtrDateFrom').value;
+  const to = document.getElementById('mtrDateTo').value;
+  const events = mtrEventsCache[currentMTRStation] || [];
+  const filtered = events.filter(ev => {
+    if (!ev.date) return true;
+    return ev.date >= from && ev.date <= to;
+  });
+  renderMTREvents(filtered);
+}
+
+function renderMTREvents(events) {
+  const list = document.getElementById('mtrEventsList');
+  if (!events || events.length === 0) {
+    list.innerHTML = '<p style="color:var(--text2);text-align:center;padding:20px 0">No hay eventos cargados. Toca "Actualizar con IA".</p>';
+    return;
+  }
+  list.innerHTML = events.map(ev => `
+    <div class="item-card" style="margin-bottom:10px">
+      <div class="ic-title"><i class="fas fa-star" style="color:var(--accent3)"></i> ${escHTML(ev.title||'Evento')}</div>
+      ${ev.date?`<div style="font-size:.72rem;color:var(--accent)"><i class="fas fa-calendar"></i> ${escHTML(ev.date)}${ev.endDate?' → '+escHTML(ev.endDate):''}</div>`:''}
+      ${ev.description?`<div style="font-size:.8rem;color:var(--text2);margin-top:4px">${escHTML(ev.description)}</div>`:''}
+      ${ev.discount?`<div class="badge badge-delivery" style="margin-top:4px"><i class="fas fa-tag"></i> ${escHTML(ev.discount)}</div>`:''}
+      <div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:8px">
+        ${ev.source?`<span style="font-size:.72rem;color:var(--text2)"><i class="fas fa-link"></i> ${escHTML(ev.source)}</span>`:''}
+        ${ev.website?`<a href="${escHTML(ev.website)}" target="_blank" style="font-size:.72rem;color:var(--accent)"><i class="fas fa-external-link-alt"></i> Web</a>`:''}
+        ${ev.address?`<span style="font-size:.72rem;color:var(--text2)"><i class="fas fa-map-marker-alt"></i> ${escHTML(ev.address)}</span>`:''}
+        ${ev.phone?`<a href="tel:${escHTML(ev.phone)}" style="font-size:.72rem;color:var(--accent)"><i class="fas fa-phone"></i> ${escHTML(ev.phone)}</a>`:''}
+        ${ev.qr?`<span style="font-size:.72rem;color:var(--text2)"><i class="fas fa-qrcode"></i> QR disponible</span>`:''}
+      </div>
+    </div>
+  `).join('');
+}
+
+async function loadMTREventsAI(stationOverride) {
+  const station = stationOverride || currentMTRStation;
+  if (!station) { showToast('Selecciona una estación', 'error'); return; }
+  if (!APP.apiKeys.gemini) { showToast(t('toast_api_missing'), 'error'); return; }
+  const from = document.getElementById('mtrDateFrom')?.value || new Date().toISOString().slice(0,10);
+  const to = document.getElementById('mtrDateTo')?.value || (() => { const d=new Date();d.setMonth(d.getMonth()+1);return d.toISOString().slice(0,10); })();
+  document.getElementById('mtrEventsLoading').style.display = 'block';
+  document.getElementById('mtrEventsList').innerHTML = '';
+  const prompt = `You are a Hong Kong events and offers assistant. Find real events, offers, discounts and activities near ${station} MTR station in Hong Kong, for the period from ${from} to ${to}.
+Include: shopping mall promotions, restaurant deals, family activities, cultural events, markets, exhibitions.
+Return ONLY a JSON array. Each object must have: title (string), date (YYYY-MM-DD or null), endDate (YYYY-MM-DD or null), description (string, max 100 chars), discount (string or null), source (venue/shop name), website (URL or null), address (string or null), phone (string or null), qr (boolean).
+Return maximum 10 events. Focus on practical, family-friendly activities.`;
+  try {
+    const mtrModelId = getGeminiModelId(APP.aiModel);
+    const resp = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${mtrModelId}:generateContent?key=${APP.apiKeys.gemini}`, {
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({ contents:[{ parts:[{ text: prompt }] }] })
+    });
+    const data = await resp.json();
+    const text = data.candidates?.[0]?.content?.parts?.[0]?.text || '';
+    const match = text.match(/\[[\s\S]*\]/);
+    if (match) {
+      const events = JSON.parse(match[0]);
+      mtrEventsCache[station] = events;
+      localStorage.setItem('adonde_mtr_events', JSON.stringify(mtrEventsCache));
+      if (!stationOverride) renderMTREvents(events);
+      return events.length;
+    } else {
+      if (!stationOverride) showToast('No se encontraron eventos', 'error');
+    }
+  } catch(e) {
+    if (!stationOverride) showToast('Error IA: ' + e.message, 'error');
+  } finally {
+    document.getElementById('mtrEventsLoading').style.display = 'none';
+  }
+  return 0;
+}
+
+async function loadSingleMTR() {
+  const station = document.getElementById('adminMTRSelect').value;
+  if (!station) { showToast('Selecciona una estación', 'error'); return; }
+  const status = document.getElementById('adminMTRStatus');
+  status.innerHTML = `<i class="fas fa-spinner fa-spin"></i> Cargando datos de ${station}...`;
+  // Set date inputs for admin modal
+  const df = document.getElementById('adminMTRDateFrom').value || new Date().toISOString().slice(0,10);
+  const dt = document.getElementById('adminMTRDateTo').value || (() => { const d=new Date();d.setMonth(d.getMonth()+1);return d.toISOString().slice(0,10); })();
+  document.getElementById('mtrDateFrom') && (document.getElementById('mtrDateFrom').value = df);
+  document.getElementById('mtrDateTo') && (document.getElementById('mtrDateTo').value = dt);
+  currentMTRStation = station;
+  const n = await loadMTREventsAI(station);
+  status.innerHTML = n > 0
+    ? `<span style="color:#44ffaa">✅ ${n} eventos cargados para ${station}</span>`
+    : `<span style="color:#ff6666">⚠ Sin eventos encontrados</span>`;
+}
+
+const ALL_MTR_STATIONS = ['Central','Admiralty','Wan Chai','Causeway Bay','Tsim Sha Tsui','Mong Kok','Jordan','Yau Ma Tei','Prince Edward','Sham Shui Po','Diamond Hill','Sha Tin','Tung Chung','North Point','Kwun Tong','Tuen Mun','Yuen Long','Mei Foo','Tsuen Wan','Lai King','Wong Tai Sin'];
+
+async function loadAllMTR() {
+  if (!APP.apiKeys.gemini) { showToast(t('toast_api_missing'), 'error'); return; }
+  const status = document.getElementById('adminMTRStatus');
+  let loaded = 0;
+  for (const station of ALL_MTR_STATIONS) {
+    status.innerHTML = `<i class="fas fa-spinner fa-spin"></i> [${loaded+1}/${ALL_MTR_STATIONS.length}] Cargando ${station}...`;
+    currentMTRStation = station;
+    const n = await loadMTREventsAI(station);
+    if (n) loaded++;
+    await new Promise(r => setTimeout(r, 800)); // rate limit
+  }
+  status.innerHTML = `<span style="color:#44ffaa">✅ Completado: ${loaded}/${ALL_MTR_STATIONS.length} estaciones con datos</span>`;
+  localStorage.setItem('adonde_mtr_events', JSON.stringify(mtrEventsCache));
+  showToast('Todos los MTR cargados', 'success');
+}
+
+/* ═══ EXTRA PLACES DATA (Familia, Cultura, Ocio, HK) ═══ */
+function getExtraPlaces() { return [
+  // MALLS
+  {id:'mall1',name:'IFC Mall 國際金融中心商場',cat:'mall',lat:22.2855,lng:114.1577,addr:'8 Finance St, Central',icon:'fa-building',color:'#4a90e2',hours:'10:00-22:00',website:'https://www.ifc.com.hk'},
+  {id:'mall2',name:'Times Square 時代廣場',cat:'mall',lat:22.2791,lng:114.1824,addr:'1 Matheson St, Causeway Bay',icon:'fa-building',color:'#4a90e2',hours:'10:00-22:00'},
+  {id:'mall3',name:'Harbour City 海港城',cat:'mall',lat:22.2999,lng:114.1680,addr:'Canton Rd, Tsim Sha Tsui',icon:'fa-building',color:'#4a90e2',hours:'10:00-21:00'},
+  {id:'mall4',name:'Megabox 九龍灣國際展貿中心',cat:'mall',lat:22.3230,lng:114.2100,addr:'38 Wang Chiu Rd, Kowloon Bay',icon:'fa-building',color:'#4a90e2',ageRange:'Familias'},
+  {id:'mall5',name:'Festival Walk 又一城',cat:'mall',lat:22.3374,lng:114.1730,addr:'80 Tat Chee Ave, Kowloon Tong',icon:'fa-building',color:'#4a90e2'},
+  {id:'mall6',name:'New Town Plaza 新城市廣場',cat:'mall',lat:22.3810,lng:114.1876,addr:'Sha Tin Centre St, Sha Tin',icon:'fa-building',color:'#4a90e2'},
+  // WELLCOME
+  {id:'wlc1',name:'Wellcome 惠康 – Central',cat:'wellcome',lat:22.2822,lng:114.1584,addr:'4 Jubilee St, Central',icon:'fa-shopping-basket',color:'#00aa44',hours:'08:00-23:00'},
+  {id:'wlc2',name:'Wellcome 惠康 – Causeway Bay',cat:'wellcome',lat:22.2800,lng:114.1836,addr:'504 Lockhart Rd, Wan Chai',icon:'fa-shopping-basket',color:'#00aa44',hours:'08:00-23:00'},
+  {id:'wlc3',name:'Wellcome 惠康 – Mong Kok',cat:'wellcome',lat:22.3195,lng:114.1690,addr:'750 Nathan Rd, Mong Kok',icon:'fa-shopping-basket',color:'#00aa44',hours:'08:00-23:00'},
+  // PLAY ROOMS
+  {id:'play1',name:'Kidspace Play Room 空間',cat:'playroom',lat:22.2803,lng:114.1836,addr:'Times Square L12, Causeway Bay',icon:'fa-puzzle-piece',color:'#ff6699',ageRange:'2-10 años',hours:'10:00-21:00'},
+  {id:'play2',name:'Tiny Kingdom 小王國',cat:'playroom',lat:22.2998,lng:114.1682,addr:'Harbour City, TST',icon:'fa-puzzle-piece',color:'#ff6699',ageRange:'0-8 años'},
+  {id:'play3',name:'Fun Central 樂園',cat:'playroom',lat:22.3232,lng:114.2098,addr:'Megabox L11, Kowloon Bay',icon:'fa-puzzle-piece',color:'#ff6699',ageRange:'1-12 años',hours:'10:00-22:00'},
+  {id:'play4',name:'Play Nation 玩樂天地',cat:'playroom',lat:22.3372,lng:114.1728,addr:'Festival Walk, Kowloon Tong',icon:'fa-puzzle-piece',color:'#ff6699',ageRange:'Familiar'},
+  // PARKS & WATERFRONT
+  {id:'park1',name:'Victoria Park 維多利亞公園',cat:'park',lat:22.2818,lng:114.1872,addr:'Causeway Rd, Causeway Bay',icon:'fa-tree',color:'#00aa44',hours:'24h'},
+  {id:'park2',name:'Kowloon Park 九龍公園',cat:'park',lat:22.3014,lng:114.1699,addr:'22 Austin Rd, Tsim Sha Tsui',icon:'fa-tree',color:'#00aa44',hours:'05:00-00:00'},
+  {id:'park3',name:'Hong Kong Park 香港公園',cat:'park',lat:22.2773,lng:114.1622,addr:'19 Cotton Tree Dr, Central',icon:'fa-tree',color:'#00aa44'},
+  {id:'wf1',name:'Tsim Sha Tsui Promenade 星光大道',cat:'waterfront',lat:22.2942,lng:114.1705,addr:'Salisbury Rd, TST',icon:'fa-water',color:'#2979ff',hours:'24h'},
+  {id:'wf2',name:'Central Harbourfront 中環海濱',cat:'waterfront',lat:22.2882,lng:114.1588,addr:'Central Pier, HK Island',icon:'fa-water',color:'#2979ff',hours:'24h'},
+  {id:'wf3',name:'West Kowloon Cultural District 西九龍文化區',cat:'waterfront',lat:22.3040,lng:114.1605,addr:'West Kowloon, Kowloon',icon:'fa-water',color:'#2979ff'},
+  // MUSEUMS & CULTURE
+  {id:'mus1',name:'Hong Kong Science Museum 香港科學館',cat:'museum',lat:22.2968,lng:114.1741,addr:'2 Science Museum Rd, TST East',icon:'fa-university',color:'#9c27b0',hours:'10:00-19:00',ageRange:'Familiar',website:'https://hk.science.museum'},
+  {id:'mus2',name:'Hong Kong Space Museum 香港太空館',cat:'museum',lat:22.2945,lng:114.1702,addr:'10 Salisbury Rd, TST',icon:'fa-university',color:'#9c27b0',hours:'13:00-21:00',ageRange:'Familiar'},
+  {id:'mus3',name:'Hong Kong Museum of History 香港歷史博物館',cat:'museum',lat:22.2962,lng:114.1748,addr:'100 Chatham Rd S, TST',icon:'fa-university',color:'#9c27b0'},
+  {id:'mus4',name:'Hong Kong Museum of Art 香港藝術館',cat:'museum',lat:22.2942,lng:114.1699,addr:'10 Salisbury Rd, TST',icon:'fa-palette',color:'#9c27b0'},
+  {id:'sci1',name:'Snoopy World 史努比開心世界',cat:'science',lat:22.4061,lng:114.0354,addr:'Yuen Long',icon:'fa-atom',color:'#ffdd00',ageRange:'Niños'},
+  // LIBRARIES
+  {id:'lib1',name:'Hong Kong Central Library 香港中央圖書館',cat:'library',lat:22.2818,lng:114.1883,addr:'66 Causeway Rd, Causeway Bay',icon:'fa-book',color:'#5c35cc',hours:'10:00-21:00'},
+  {id:'lib2',name:'Kowloon Public Library 九龍公共圖書館',cat:'library',lat:22.3181,lng:114.1697,addr:'Jordan, Kowloon',icon:'fa-book',color:'#5c35cc'},
+  // ZOO & AQUARIUM
+  {id:'zoo1',name:'Ocean Park 海洋公園',cat:'zoo',lat:22.2470,lng:114.1743,addr:'Aberdeen, HK Island',icon:'fa-paw',color:'#00aacc',hours:'10:00-19:00',ageRange:'Familiar',website:'https://www.oceanpark.com.hk'},
+  {id:'zoo2',name:'Hong Kong Zoological & Botanical Gardens',cat:'zoo',lat:22.2798,lng:114.1559,addr:'Albany Rd, Central',icon:'fa-paw',color:'#00aacc',hours:'05:00-22:00'},
+  {id:'zoo3',name:'Hong Kong Wetland Park 香港濕地公園',cat:'zoo',lat:22.4668,lng:114.0025,addr:'Wetland Park Rd, Tin Shui Wai',icon:'fa-paw',color:'#00aacc',ageRange:'Familiar'},
+  // THEME PARKS
+  {id:'thm1',name:'Hong Kong Disneyland 香港迪士尼樂園',cat:'theme',lat:22.3130,lng:114.0413,addr:'Lantau Island',icon:'fa-dragon',color:'#e60012',hours:'10:00-20:00',ageRange:'Familiar',website:'https://www.hongkongdisneyland.com'},
+  // ADVENTURE
+  {id:'adv1',name:'Clip n Climb HK',cat:'adventure',lat:22.2991,lng:114.1678,addr:'Ocean Terminal, Harbour City, TST',icon:'fa-mountain',color:'#ff5722',ageRange:'4+ años',hours:'10:00-20:00'},
+  {id:'adv2',name:'Sky100 Observation Deck 天際100',cat:'adventure',lat:22.3048,lng:114.1615,addr:'International Commerce Centre, Kowloon',icon:'fa-mountain',color:'#ff5722',hours:'10:00-21:00'},
+  {id:'adv3',name:'Green Hub 綠匯學苑 Cycling',cat:'cycling',lat:22.5042,lng:114.1202,addr:'Taipo, New Territories',icon:'fa-bicycle',color:'#4caf50',ageRange:'Familiar'},
+  {id:'adv4',name:'Ma On Shan Cycling Track 馬鞍山單車徑',cat:'cycling',lat:22.4237,lng:114.2322,addr:'Ma On Shan, NT',icon:'fa-bicycle',color:'#4caf50'},
+  // FAMILY DINING
+  {id:'fd1',name:'Tim Ho Wan 添好運 (Family)',cat:'familydining',lat:22.3193,lng:114.1694,addr:'2-20 Kwong Wa St, MK',icon:'fa-users',color:'#ff6600',hours:'10:00-22:00'},
+  {id:'fd2',name:'Jumbo Kingdom Floating Restaurant',cat:'familydining',lat:22.2470,lng:114.1530,addr:'Shum Wan Pier Dr, Aberdeen',icon:'fa-users',color:'#ff6600'},
+  // CAFES
+  {id:'caf1',name:'% Arabica Coffee 阿拉比卡',cat:'cafe',lat:22.2860,lng:114.1572,addr:'1F, 18 Ship St, Wan Chai',icon:'fa-coffee',color:'#795548'},
+  {id:'caf2',name:'Lan Fong Yuen 蘭芳園 – Milk Tea',cat:'cafe',lat:22.2838,lng:114.1543,addr:'2 Gage St, Central',icon:'fa-coffee',color:'#795548',hours:'07:30-18:00'},
+  // DIM SUM
+  {id:'ds1',name:'Maxim\'s Palace City Hall 美心皇宮',cat:'dimsum',lat:22.2823,lng:114.1589,addr:'Edinburgh Pl, Central',icon:'fa-bowl-rice',color:'#e91e63'},
+  {id:'ds2',name:'Lung King Heen 龍景軒',cat:'dimsum',lat:22.2856,lng:114.1577,addr:'Four Seasons Hotel, Central',icon:'fa-bowl-rice',color:'#e91e63'},
+  // PHARMACY
+  {id:'phm1',name:'Watsons 屈臣氏 – TST',cat:'pharmacy',lat:22.2978,lng:114.1720,addr:'Harbour City, TST',icon:'fa-pills',color:'#009688'},
+  {id:'phm2',name:'Mannings 萬寧 – Central',cat:'pharmacy',lat:22.2823,lng:114.1573,addr:'IFC Mall, Central',icon:'fa-pills',color:'#009688'},
+  // TEMPLES
+  {id:'tmp1',name:'Wong Tai Sin Temple 黃大仙祠',cat:'temple',lat:22.3427,lng:114.1936,addr:'2 Chuk Yuen Village, WT Sin',icon:'fa-place-of-worship',color:'#ff9800'},
+  {id:'tmp2',name:'Man Mo Temple 文武廟',cat:'temple',lat:22.2843,lng:114.1508,addr:'124 Hollywood Rd, Central',icon:'fa-place-of-worship',color:'#ff9800'},
+  // ART
+  {id:'art1',name:'M+ Museum 西九文化區',cat:'art',lat:22.3032,lng:114.1600,addr:'38 Museum Dr, West Kowloon',icon:'fa-palette',color:'#673ab7',website:'https://www.mplus.org.hk'},
+  {id:'art2',name:'PMQ 元創方 Creative Hub',cat:'art',lat:22.2836,lng:114.1518,addr:'35 Aberdeen St, Central',icon:'fa-palette',color:'#673ab7'},
+  // FERRY
+  {id:'fry1',name:'Star Ferry Central Pier 中環天星碼頭',cat:'ferry',lat:22.2878,lng:114.1598,addr:'Pier 7, Central Harbourfront',icon:'fa-ship',color:'#2196f3'},
+  {id:'fry2',name:'Star Ferry TST Pier 尖沙咀天星碼頭',cat:'ferry',lat:22.2942,lng:114.1691,addr:'Salisbury Rd, TST',icon:'fa-ship',color:'#2196f3'},
+  // TRAM
+  {id:'trm1',name:'Peak Tram Lower Terminal 山頂纜車',cat:'tram',lat:22.2788,lng:114.1589,addr:'33 Garden Rd, Central',icon:'fa-tram',color:'#ff5722',website:'https://www.thepeak.com.hk'},
+  // BANKS
+  {id:'bnk1',name:'HSBC Main Building 匯豐總行',cat:'bank',lat:22.2799,lng:114.1591,addr:'1 Queen\'s Rd Central',icon:'fa-university',color:'#e53935'},
+  // HOTELS
+  {id:'htl1',name:'The Peninsula Hong Kong 半島酒店',cat:'hotel',lat:22.2952,lng:114.1716,addr:'Salisbury Rd, TST',icon:'fa-hotel',color:'#ffd700'},
+  // MARKET
+  {id:'mkt1',name:'Temple Street Night Market 廟街夜市',cat:'market',lat:22.3050,lng:114.1703,addr:'Temple St, Jordan/Yau Ma Tei',icon:'fa-store-alt',color:'#ff5722',hours:'18:00-00:00'},
+  {id:'mkt2',name:'Ladies Market 女人街',cat:'market',lat:22.3207,lng:114.1696,addr:'Tung Choi St, Mong Kok',icon:'fa-store-alt',color:'#ff5722',hours:'13:00-23:30'},
+];}
+
+// ===== INIT =====
+function initApp() {
+  loadState();
+  document.body.setAttribute('data-theme', APP.theme);
+  document.querySelectorAll('.theme-opt').forEach(o => o.classList.toggle('active', o.dataset.thopt === APP.theme));
+  document.querySelectorAll('.lang-btn').forEach(b => b.classList.toggle('active', b.dataset.lang === APP.lang));
+  document.getElementById('toggleSound').classList.toggle('on', APP.soundEnabled);
+  document.getElementById('toggleTTS').classList.toggle('on', APP.ttsEnabled);
+  document.getElementById('toggleScan').classList.toggle('on', APP.scanEnabled);
+  document.getElementById('toggleScanHistory').classList.toggle('on', APP.scanHistory !== false);
+  document.getElementById('toggleMapRotate').classList.toggle('on', APP.mapRotate);
+  document.getElementById('toggleSpeed').classList.toggle('on', APP.speedEnabled);
+  document.getElementById('toggleDarkTiles').classList.toggle('on', APP.darkTiles);
+  if (document.getElementById('ttsLangSel')) document.getElementById('ttsLangSel').value = APP.ttsLang || 'en-GB';
+  if (document.getElementById('speedHud')) document.getElementById('speedHud').style.display = APP.speedEnabled ? 'block' : 'none';
+  if (APP.apiKeys.gemini) document.getElementById('geminiKey').value = APP.apiKeys.gemini;
+  if (APP.apiKeys.groq) document.getElementById('groqKey').value = APP.apiKeys.groq;
+  const aiModelEl = document.getElementById('aiModel');
+  if (aiModelEl) {
+    // Migrate legacy model IDs
+    const legacyMap = {
+      'gemini': 'gemini-3.1-pro-preview',
+      'gemini-2.5-pro': 'gemini-3.1-pro-preview',
+      'gemini-2.0-flash': 'gemini-2.5-flash',
+      'gemini-2.0-flash-lite': 'gemini-2.5-flash-lite',
+      'gemini-1.5-pro': 'gemini-2.5-pro',
+      'gemini-1.5-flash': 'gemini-2.5-flash',
+      'groq-llama': 'groq-llama3-70b',
+      'groq-mixtral': 'groq-mixtral'
+    };
+    if (legacyMap[APP.aiModel]) APP.aiModel = legacyMap[APP.aiModel];
+    aiModelEl.value = APP.aiModel;
+    if (!aiModelEl.value) aiModelEl.value = 'gemini-2.5-pro';
+  }
+
+  // Merge extra places (family, culture, leisure) without duplicates
+  const extra = getExtraPlaces();
+  extra.forEach(p => { if (!APP.places.find(ep => ep.id === p.id)) APP.places.push(p); });
+
+  // Load cached MTR events
+  try {
+    const cached = localStorage.getItem('adonde_mtr_events');
+    if (cached) mtrEventsCache = JSON.parse(cached);
+  } catch(e) {}
+
+  // Pre-load TTS voices
+  if (window.speechSynthesis) {
+    window.speechSynthesis.getVoices();
+    window.speechSynthesis.addEventListener('voiceschanged', () => window.speechSynthesis.getVoices());
+  }
+
+  updateI18N();
+  updateFolderSelects();
+  renderCustomButtons();
+  initMap();
+
+  // Apply dark tiles after map init if enabled
+  if (APP.darkTiles) setTimeout(() => applyTileTheme(), 300);
+
+  // Start scanner if enabled
+  if (APP.scanEnabled) startScanInterval();
+
+  locateUser();
+  checkSharedContent();
+  updateOnlineStatus();
+
+  // Hide splash and force map render
+  setTimeout(() => {
+    document.getElementById('splash').classList.add('hide');
+    setTimeout(() => {
+      document.getElementById('splash').style.display = 'none';
+      map.invalidateSize(true);
+    }, 800);
+  }, 1500);
+
+  // Register Service Worker
+  if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.register('./sw.js').then(reg => {
+      console.log('[App] SW registered:', reg.scope);
+    }).catch(err => console.warn('[App] SW registration failed:', err));
+  }
+}
+
+// AI input Enter key
+document.getElementById('aiInput').addEventListener('keydown', (e) => {
+  if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendAIMessage(); }
+});
+
+// Search input Enter key
+document.getElementById('searchInput').addEventListener('keydown', (e) => {
+  if (e.key === 'Enter') doSearch();
+});
+
+// Overlay close on click
+document.querySelectorAll('.modal-overlay').forEach(m => {
+  m.addEventListener('click', (e) => { if (e.target === m) m.classList.remove('show'); });
+});
+
+// Start the app
+window.addEventListener('DOMContentLoaded', initApp);
+</script>
+
+
+</body></html>
